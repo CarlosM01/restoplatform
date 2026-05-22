@@ -1,0 +1,45 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="Resultado del payment · RestoPlatform">
+  <div class="app-shell">
+    <div class="app-header">
+      <div>
+        <div class="brand">RestoPlatform</div>
+        <div class="name">La Leña Restaurante</div>
+      </div>
+    </div>
+
+    <div id="resultado" style="padding: 30px 20px; text-align: center; flex: 1;">
+      <div id="loading">Cargando resultado...</div>
+    </div>
+  </div>
+
+  <script is:inline>
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status');
+    const pedido = params.get('pedido');
+    const cont = document.getElementById('resultado');
+
+    if (status === 'exitoso') {
+      cont.innerHTML = `
+        <div style="width:80px;height:80px;background:#E8F5E9;border-radius:40px;display:flex;align-items:center;justify-content:center;margin:30px auto 20px;font-size:42px">✅</div>
+        <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:8px">¡Pago Aceptado!</div>
+        <div style="font-size:13px;color:#2E7D32;font-weight:600;margin-bottom:20px">Tu pedido #${pedido} ha sido confirmado</div>
+        <div style="background:#E8F5E9;border-radius:12px;padding:14px;display:inline-flex;align-items:center;gap:10px;font-size:13px;color:#2E7D32">
+          <span style="font-size:22px">💬</span> Recibirás confirmación por WhatsApp
+        </div>
+        <div style="margin-top:30px">
+          <a href="/" style="display:inline-block;padding:12px 24px;background:#1B1916;color:#fff;border-radius:10px;font-weight:600;font-size:14px;text-decoration:none">Volver al inicio</a>
+        </div>`;
+    } else {
+      cont.innerHTML = `
+        <div style="width:80px;height:80px;background:#FFEBEE;border-radius:40px;display:flex;align-items:center;justify-content:center;margin:30px auto 20px;font-size:42px">❌</div>
+        <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:8px">Pago Rechazado</div>
+        <div style="font-size:13px;color:#C62828;margin-bottom:20px">El payment del pedido #${pedido} no se completó</div>
+        <div style="margin-top:30px">
+          <a href="/" style="display:inline-block;padding:12px 24px;background:#1B1916;color:#fff;border-radius:10px;font-weight:600;font-size:14px;text-decoration:none">Intentar de nuevo</a>
+        </div>`;
+    }
+  </script>
+</Layout>

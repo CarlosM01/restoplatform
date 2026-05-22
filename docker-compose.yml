@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: restoplatform-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: restoplatform
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: restoplatform-api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/restoplatform
+      SECRET_KEY: dev-secret-change-in-production
+      FRONTEND_URL: http://localhost:4321
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  directus:
+    image: directus/directus:11
+    container_name: restoplatform-cms
+    ports:
+      - "8055:8055"
+    environment:
+      KEY: a-secret-key-change-me
+      SECRET: another-secret-change-me
+      DB_CLIENT: pg
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: restoplatform
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      ADMIN_EMAIL: admin@lalena.cl
+      ADMIN_PASSWORD: admin123
+      PUBLIC_URL: http://localhost:8055
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

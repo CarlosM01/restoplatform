@@ -1,0 +1,46 @@
+---
+// Esta página recibe el POST de Webpay con token_ws
+// y lo reenvía al backend que confirma el payment
+const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
+---
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Procesando payment...</title>
+  <style>
+    body { font-family: 'DM Sans', sans-serif; background: #FDFAF6; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .box { text-align: center; }
+    .spin { animation: spin 1s linear infinite; font-size: 40px; display: inline-block; }
+    @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="spin">⏳</div>
+    <p style="margin-top: 20px; color: #6B6560;">Procesando payment con Webpay...</p>
+  </div>
+
+  <script is:inline define:vars={{ API_URL }}>
+    // Webpay devuelve token_ws como query string (GET) o form data (POST)
+    // Astro nos da GET, así que extraemos de la URL
+    const params = new URLSearchParams(window.location.search);
+    const token_ws = params.get('token_ws') || params.get('TBK_TOKEN');
+
+    if (token_ws) {
+      // Crear form para enviar al backend
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `${API_URL}/pagos/confirmar`;
+      const inp = document.createElement('input');
+      inp.type = 'hidden';
+      inp.name = 'token_ws';
+      inp.value = token_ws;
+      form.appendChild(inp);
+      document.body.appendChild(form);
+      form.submit();
+    } else {
+      document.querySelector('.box').innerHTML = '<p>❌ Pago cancelado o sin token</p><a href="/">Volver al inicio</a>';
+    }
+  </script>
+</body>
+</html>
