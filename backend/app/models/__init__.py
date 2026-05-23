@@ -144,3 +144,13 @@ class Payment(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     order: Mapped["Order"] = relationship(back_populates="payment")
+
+
+# Menu schema models (docs/menu_schema.md)
+from app.models.menu import (  # noqa: F401, E402
+    Category, MenuItem, MenuItemVariant, ModifierGroup, Modifier,
+    Supplier, Ingredient, DietaryTag, Allergen,
+    MenuItemModifierGroup, MenuItemDietaryTag, VariantModifierGroup,
+    VariantIngredient, MenuItemIngredient, ModifierIngredient,
+    IngredientAllergen,
+)

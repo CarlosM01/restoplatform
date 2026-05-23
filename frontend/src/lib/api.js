@@ -129,6 +129,14 @@ export const adminUnbanUser = (id) =>
 export const adminDeleteUser = (id) =>
   api(`/admin/users/${id}`, { method: 'DELETE' });
 
+// Menu CRUD — generic factory
+export const menuCrud = (entity) => ({
+  list:   ()         => api(`/admin/menu/${entity}`),
+  create: (data)     => api(`/admin/menu/${entity}`, { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => api(`/admin/menu/${entity}/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  remove: (id)       => api(`/admin/menu/${entity}/${id}`, { method: 'DELETE' }),
+});
+
 // Inventory / products CRUD
 export const createProduct = (data) =>
   api('/products', { method: 'POST', body: JSON.stringify(data) });
