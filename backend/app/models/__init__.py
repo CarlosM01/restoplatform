@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Boolean, Enum as SQLEnum
+from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Boolean, Enum as SQLEnum, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
@@ -49,6 +49,7 @@ class Product(Base):
     category: Mapped[str] = mapped_column(String(50))
     image: Mapped[str] = mapped_column(String(255), default="")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    modifiers: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True, default=list)
 
     inventory: Mapped["Inventory | None"] = relationship(back_populates="product", uselist=False, cascade="all, delete-orphan")
 
@@ -94,6 +95,7 @@ class OrderItem(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
     quantity: Mapped[int] = mapped_column(Integer)
     unit_price: Mapped[float] = mapped_column(Float)
+    modifiers: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True, default=list)
 
     order: Mapped["Order"] = relationship(back_populates="items")
     product: Mapped["Product"] = relationship()

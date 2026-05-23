@@ -1,0 +1,495 @@
+/* Progress Tracker */
+.progress-bar-container {
+  background: #FFF;
+  padding: 12px 18px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.progress-steps {
+  display: flex;
+  align-items: center;
+}
+
+.progress-step-item {
+  display: flex;
+  align-items: center;
+}
+
+.progress-step-item.expanded {
+  flex: 1;
+}
+
+.progress-step-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.progress-step-circle.active {
+  background: var(--color-gold);
+  color: #fff;
+}
+
+.progress-step-circle.inactive {
+  background: #EDE8E0;
+  color: var(--color-muted);
+}
+
+.progress-step-label {
+  font-size: 10px;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+.progress-step-label.active {
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.progress-step-label.inactive {
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.progress-step-line {
+  flex: 1;
+  height: 2px;
+  margin: 0 8px;
+  border-radius: 1px;
+  transition: background 0.2s ease;
+}
+
+.progress-step-line.active {
+  background: var(--color-gold);
+}
+
+.progress-step-line.inactive {
+  background: #EDE8E0;
+}
+
+/* Category Filter Bar */
+.category-filter-header {
+  padding: 14px 18px 6px;
+}
+
+.category-filter-title {
+  font-weight: 700;
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+
+.category-filter-subtitle {
+  font-size: 11px;
+  color: var(--color-muted);
+  margin-bottom: 10px;
+}
+
+.category-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none; /* Hide scrollbar for clean visual appearance */
+}
+
+.category-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.category-btn {
+  padding: 6px 13px;
+  border-radius: 18px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.category-btn.active {
+  border: none;
+  background: var(--color-dark);
+  color: #FFF;
+}
+
+.category-btn.inactive {
+  border: 1px solid #DDD6CC;
+  background: #FFF;
+  color: #6B6560;
+}
+
+/* Products List */
+.products-grid {
+  padding: 4px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-item-card {
+  background: #FFF;
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.product-item-image {
+  font-size: 32px;
+  width: 50px;
+  height: 50px;
+  background: var(--color-bg-2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.product-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.product-desc {
+  font-size: 10px;
+  color: var(--color-muted);
+}
+
+.product-action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.product-price {
+  color: var(--color-gold);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Cart Resume Step */
+.cart-container {
+  padding: 18px;
+}
+
+.cart-title {
+  font-weight: 700;
+  font-size: 17px;
+  margin-bottom: 3px;
+}
+
+.cart-subtitle {
+  font-size: 11px;
+  color: var(--color-muted);
+  margin-bottom: 16px;
+}
+
+.cart-section-title {
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 8px;
+  color: var(--color-gold);
+}
+
+.cart-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cart-item-details {
+  flex: 1;
+}
+
+.cart-item-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.cart-item-mods {
+  font-size: 10px;
+  color: var(--color-gold);
+  margin-top: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.cart-item-price-qty {
+  font-size: 11px;
+  color: var(--color-muted);
+  margin-top: 2px;
+}
+
+.cart-qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cart-qty-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #FFF;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cart-qty-btn.minus {
+  border: 1px solid #DDD6CC;
+}
+
+.cart-qty-btn.plus {
+  border: none;
+  background: var(--color-dark);
+  color: #fff;
+}
+
+.cart-item-total {
+  font-weight: 700;
+  font-size: 13px;
+  margin-left: 10px;
+  min-width: 60px;
+  text-align: right;
+}
+
+.cart-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 0 0;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.cart-total-price {
+  color: var(--color-gold);
+}
+
+/* Payment Checkout Step */
+.payment-container {
+  padding: 18px;
+}
+
+.payment-card {
+  background: #FFF;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.payment-card.mini {
+  border: 1px solid #EAEAEA;
+  padding: 20px;
+}
+
+.payment-emoji {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.payment-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  font-family: var(--font-serif);
+}
+
+.payment-subtitle {
+  font-size: 12px;
+  color: var(--color-muted);
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+}
+
+.payment-amount-box {
+  background: var(--color-bg-2);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.payment-amount-label {
+  font-size: 10px;
+  color: var(--color-muted);
+  margin-bottom: 2px;
+}
+
+.payment-amount-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.payment-amount-value.large {
+  font-size: 28px;
+}
+
+.payment-simulation-alert {
+  background: #E8F5E9;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.payment-simulation-text {
+  font-size: 10px;
+  color: #2E7D32;
+  text-align: left;
+}
+
+/* Footer Bottom Bar */
+.bottom-bar {
+  flex-shrink: 0;
+  padding: 12px 18px;
+  background: #FFF;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  gap: 10px;
+}
+
+/* Customizer Modal specific styling */
+.customizer-header-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.customizer-image {
+  font-size: 36px;
+  width: 54px;
+  height: 54px;
+  background: var(--color-bg-2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.customizer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.customizer-group-section {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 14px;
+}
+
+.customizer-group-title {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--color-dark);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.customizer-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.customizer-option-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.customizer-option-item.selected {
+  border: 1px solid var(--color-gold);
+  background: #FFFDF9;
+}
+
+.customizer-option-item.unselected {
+  border: 1px solid #EAEAEA;
+  background: #FFF;
+}
+
+.customizer-option-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.customizer-option-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.customizer-option-check.selected {
+  border: 1px solid var(--color-gold);
+  background: var(--color-gold);
+}
+
+.customizer-option-check.unselected {
+  border: 1px solid #CCC;
+  background: transparent;
+}
+
+.customizer-option-label {
+  font-size: 12px;
+}
+
+.customizer-option-label.selected {
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.customizer-option-label.unselected {
+  font-weight: 400;
+  color: #4A4A4A;
+}
+
+.customizer-option-price {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.customizer-option-price.selected {
+  color: var(--color-gold);
+}
+
+.customizer-option-price.unselected {
+  color: var(--color-muted);
+}

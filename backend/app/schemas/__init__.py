@@ -59,6 +59,7 @@ class ProductBase(BaseModel):
     price: float = Field(..., gt=0)
     category: str
     image: str = ""
+    modifiers: list[dict] | None = None
 
 
 class ProductCreate(ProductBase):
@@ -72,6 +73,7 @@ class ProductUpdate(BaseModel):
     category: str | None = None
     image: str | None = None
     is_active: bool | None = None
+    modifiers: list[dict] | None = None
 
 
 class ProductOut(ProductBase):
@@ -106,9 +108,15 @@ class TableOut(TableBase):
 
 
 # ============ PEDIDOS ============
+class OrderItemModifier(BaseModel):
+    name: str
+    price_delta: float
+
+
 class OrderItemCreate(BaseModel):
     product_id: int
     quantity: int = Field(..., ge=1)
+    modifiers: list[OrderItemModifier] | None = None
 
 
 class OrderCreate(BaseModel):
@@ -120,6 +128,7 @@ class OrderItemOut(BaseModel):
     product_id: int
     quantity: int
     unit_price: float
+    modifiers: list[dict] | None = None
     model_config = ConfigDict(from_attributes=True)
 
 

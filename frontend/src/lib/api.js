@@ -132,6 +132,8 @@ export const createProduct = (data) =>
   api('/products', { method: 'POST', body: JSON.stringify(data) });
 export const updateProduct = (id, data) =>
   api(`/products/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteProduct = (id) =>
+  api(`/products/${id}`, { method: 'DELETE' });
 export const updateStock = (id, stock, minimum_stock) =>
   api(`/products/${id}/stock`, {
     method: 'PATCH',

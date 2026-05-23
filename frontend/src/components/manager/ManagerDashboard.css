@@ -1,0 +1,174 @@
+/* Manager Tabs Bar */
+.manager-tabs-bar {
+  display: flex;
+  background: #FFF;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.manager-tab-btn {
+  padding: 14px 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.manager-tab-badge {
+  background: #E85D3A;
+  color: #fff;
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Orders Layout */
+.orders-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.orders-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+}
+
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 14px;
+}
+
+/* Order Cards */
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.order-card-id {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.order-card-time {
+  font-size: 10px;
+  color: var(--color-muted);
+}
+
+.order-card-status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.order-card-items-list {
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.order-card-item-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 3px 0;
+}
+
+.order-card-total-row {
+  padding: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+}
+
+.order-card-total-val {
+  color: var(--color-gold);
+}
+
+.order-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Inventory Panel */
+.inventory-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.inventory-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+}
+
+.inventory-table-container {
+  overflow: hidden;
+}
+
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.inventory-table th {
+  padding: 12px;
+  text-align: left;
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+.inventory-table td {
+  padding: 12px;
+}
+
+.inventory-product-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inventory-product-emoji {
+  font-size: 20px;
+}
+
+.inventory-product-name {
+  font-weight: 600;
+}
+
+.inventory-product-desc {
+  font-size: 10px;
+  color: var(--color-muted);
+}
+
+.inventory-status-badge {
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.stock-editing-row {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.stock-input {
+  width: 70px;
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid var(--color-gold);
+}

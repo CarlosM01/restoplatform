@@ -20,7 +20,7 @@ def crear_pedido(
 
     # Validar stock y calcular total en una sola transacción
     total = 0.0
-    items_data: list[tuple[Product, int]] = []
+    items_data: list[tuple[Product, int, float, list | None]] = []
 
     for item in data.items:
         # SELECT FOR UPDATE para evitar race conditions
@@ -41,8 +41,13 @@ def crear_pedido(
                 f"Stock insuficiente para {product.name} (disponible: {product.inventory.stock})"
             )
 
-        items_data.append((product, item.quantity))
-        total += product.price * item.quantity
+        item_unit_price = product.price
+        if item.modifiers:
+            for mod in item.modifiers:
+                item_unit_price += mod.price_delta
+
+        items_data.append((product, item.quantity, item_unit_price, item.modifiers))
+        total += item_unit_price * item.quantity
 
     order = Order(
         customer_id=user.id if user else None,
@@ -52,12 +57,13 @@ def crear_pedido(
     db.add(order)
     db.flush()
 
-    for product, quantity in items_data:
+    for product, quantity, unit_price, modifiers in items_data:
         db.add(OrderItem(
             order_id=order.id,
             product_id=product.id,
             quantity=quantity,
-            unit_price=product.price,
+            unit_price=unit_price,
+            modifiers=[{"name": m.name, "price_delta": m.price_delta} for m in modifiers] if modifiers else []
         ))
         product.inventory.stock -= quantity
 

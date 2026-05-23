@@ -53,6 +53,7 @@ def crear(
         price=data.price,
         category=data.category,
         image=data.image,
+        modifiers=data.modifiers,
     )
     db.add(p)
     db.flush()
