@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select
 from app.core.database import get_db
-from app.deps import require_cliente, require_encargado
+from app.deps import require_cliente, require_encargado, get_current_user_optional
 from app.models import Order, OrderItem, Product, OrderStatus, User, Role
 from app.schemas import OrderCreate, OrderOut
 
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/orders", tags=["orders"])
 def crear_pedido(
     data: OrderCreate,
     db: Session = Depends(get_db),
-    user: User = Depends(require_cliente),
+    user: User | None = Depends(get_current_user_optional),
 ):
     if not data.items:
         raise HTTPException(400, "El order debe tener al menos un ítem")
@@ -45,7 +45,7 @@ def crear_pedido(
         total += product.price * item.quantity
 
     order = Order(
-        customer_id=user.id,
+        customer_id=user.id if user else None,
         total=total,
         status=OrderStatus.PENDING,
     )
@@ -95,13 +95,16 @@ def pedidos_sede(
 def obtener(
     order_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_cliente),
+    user: User | None = Depends(get_current_user_optional),
 ):
     p = db.get(Order, order_id)
     if not p:
         raise HTTPException(404)
-    if user.role == Role.CUSTOMER and p.customer_id != user.id:
-        raise HTTPException(403, "No puedes ver orders de otros clientes")
+    if p.customer_id is not None:
+        if not user:
+            raise HTTPException(401, "Debes iniciar sesión para ver este pedido")
+        if user.role == Role.CUSTOMER and p.customer_id != user.id:
+            raise HTTPException(403, "No puedes ver orders de otros clientes")
     return p
 
 

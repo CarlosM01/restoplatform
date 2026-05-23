@@ -76,13 +76,13 @@ class Table(Base):
 class Order(Base):
     __tablename__ = "orders"
     id: Mapped[int] = mapped_column(primary_key=True)
-    customer_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    customer_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
 
     total: Mapped[float] = mapped_column(Float)
     status: Mapped[OrderStatus] = mapped_column(SQLEnum(OrderStatus), default=OrderStatus.PENDING)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    customer: Mapped["User"] = relationship(back_populates="orders")
+    customer: Mapped["User | None"] = relationship(back_populates="orders")
     items: Mapped[list["OrderItem"]] = relationship(back_populates="order", cascade="all, delete-orphan")
     payment: Mapped["Payment | None"] = relationship(back_populates="order", uselist=False, cascade="all, delete-orphan")
 

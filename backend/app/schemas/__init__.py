@@ -125,7 +125,7 @@ class OrderItemOut(BaseModel):
 
 class OrderOut(BaseModel):
     id: int
-    customer_id: int
+    customer_id: int | None
 
     total: float
     status: OrderStatus

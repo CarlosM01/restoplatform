@@ -1,6 +1,7 @@
 ---
 // Esta página recibe el POST de Webpay con token_ws
 // y lo reenvía al backend que confirma el payment
+// @ts-ignore
 const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
 ---
 <html lang="es">
@@ -30,7 +31,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000';
       // Crear form para enviar al backend
       const form = document.createElement('form');
       form.method = 'POST';
-      form.action = `${API_URL}/pagos/confirmar`;
+      form.action = `${API_URL}/payments/confirmar`;
       const inp = document.createElement('input');
       inp.type = 'hidden';
       inp.name = 'token_ws';

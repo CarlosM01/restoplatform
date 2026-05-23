@@ -63,10 +63,9 @@ export default function CustomerMenu() {
     payment: false, // payment se maneja distinto
   };
 
-  const procesarCheckout = async () => {
-    if (!user) {
-      alert('Debes iniciar sesión para pagar');
-      window.location.href = '/login';
+  const procesarCheckout = async (asGuest = false) => {
+    if (!user && !asGuest) {
+      alert('Debes iniciar sesión o continuar como invitado para pagar');
       return;
     }
     setProcessing(true);
@@ -76,20 +75,11 @@ export default function CustomerMenu() {
         items: cart.map(c => ({ product_id: c.id, quantity: c.qty })),
       });
 
-      // 2. Iniciar payment Webpay
+      // 2. Iniciar pago simulado (el backend confirmará el pago directamente)
       const payment = await initPayment(pedido.id);
 
-      // 3. Submit a Webpay (form POST con token_ws)
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = payment.url;
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'token_ws';
-      input.value = payment.token;
-      form.appendChild(input);
-      document.body.appendChild(form);
-      form.submit();
+      // 3. Redirigir directamente a la página de resultado exitoso en el frontend
+      window.location.href = payment.url;
     } catch (e) {
       setError(e.message);
       setProcessing(false);
@@ -184,7 +174,7 @@ export default function CustomerMenu() {
         {step === 'cart' && (
           <div style={{ padding: 18 }}>
             <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 3 }}>Resumen del pedido</div>
-            <div style={{ fontSize: 11, color: M, marginBottom: 16 }}>Revisa antes de pagar con Webpay.</div>
+            <div style={{ fontSize: 11, color: M, marginBottom: 16 }}>Revisa tu pedido antes de pagar.</div>
 
             <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 8, color: G }}>🍽️ PRODUCTOS</div>
             {cart.map(c => (
@@ -209,26 +199,65 @@ export default function CustomerMenu() {
 
         {/* STEP PAYMENT */}
         {step === 'payment' && (
-          <div style={{ padding: 18, textAlign: 'center' }}>
-            <div style={{ background: '#FFF', borderRadius: 16, border: '1px solid #E0E0E0', padding: 24 }}>
-              <div style={{ marginBottom: 18 }}>
-                <div style={{ fontSize: 36, marginBottom: 10 }}>💳</div>
-                <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>Pagar con Webpay</div>
-                <div style={{ fontSize: 12, color: M }}>Te redirigiremos a la pasarela segura de Transbank</div>
+          <div style={{ padding: 18 }}>
+            {!user ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* Opción 1: Checkout de Invitado */}
+                <div style={{ background: '#FFF', borderRadius: 16, border: `1px solid ${B}`, padding: 24, boxShadow: '0 4px 12px rgba(0,0,0,0.03)', textAlign: 'center' }}>
+                  <div style={{ fontSize: 32, marginBottom: 8 }}>⚡</div>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 4px 0', fontFamily: "'Playfair Display',serif" }}>Pago Rápido como Invitado</h3>
+                  <p style={{ fontSize: 12, color: M, margin: '0 0 16px 0', lineHeight: '1.4' }}>No necesitas registrarte ni crear una contraseña para realizar tu pedido.</p>
+                  
+                  <div style={{ background: BG, borderRadius: 10, padding: 14, marginBottom: 16 }}>
+                    <div style={{ fontSize: 10, color: M, marginBottom: 2 }}>Total a pagar</div>
+                    <div style={{ fontSize: 24, fontWeight: 700, color: D }}>{fmt(total)}</div>
+                  </div>
+
+                  <button 
+                    onClick={() => procesarCheckout(true)} 
+                    disabled={processing} 
+                    className="btn-gold" 
+                    style={{ width: '100%', padding: 12, fontSize: 14, fontWeight: 700 }}
+                  >
+                    {processing ? '⏳ Procesando...' : `Pagar como Invitado → ${fmt(total)}`}
+                  </button>
+                </div>
+
+                {/* Opción 2: Iniciar Sesión (Opcional) */}
+                <div style={{ background: '#FFF', borderRadius: 16, border: '1px solid #EAEAEA', padding: 20, textAlign: 'center' }}>
+                  <div style={{ fontSize: 24, marginBottom: 6 }}>🔑</div>
+                  <h4 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 4px 0', fontFamily: "'Playfair Display',serif" }}>¿Tienes una cuenta?</h4>
+                  <p style={{ fontSize: 11, color: M, margin: '0 0 12px 0' }}>Inicia sesión para guardar tu historial de pedidos y ver tus detalles.</p>
+                  <a 
+                    href="/login" 
+                    className="btn-ghost" 
+                    style={{ display: 'block', padding: '10px', fontSize: 13, textDecoration: 'none', textAlign: 'center', fontWeight: 600 }}
+                  >
+                    Iniciar Sesión
+                  </a>
+                </div>
               </div>
-              <div style={{ background: BG, borderRadius: 10, padding: 16, marginBottom: 18 }}>
-                <div style={{ fontSize: 11, color: M, marginBottom: 4 }}>Total a pagar</div>
-                <div style={{ fontSize: 28, fontWeight: 700, color: D }}>{fmt(total)}</div>
+            ) : (
+              <div style={{ background: '#FFF', borderRadius: 16, border: '1px solid #E0E0E0', padding: 24, textAlign: 'center' }}>
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ fontSize: 36, marginBottom: 10 }}>💳</div>
+                  <h3 style={{ fontWeight: 700, fontSize: 18, marginBottom: 4, fontFamily: "'Playfair Display',serif" }}>Confirmar Pedido</h3>
+                  <div style={{ fontSize: 12, color: M, marginBottom: 10 }}>Sesión iniciada como <strong>{user.name}</strong></div>
+                </div>
+                <div style={{ background: BG, borderRadius: 10, padding: 16, marginBottom: 18 }}>
+                  <div style={{ fontSize: 11, color: M, marginBottom: 4 }}>Total a pagar</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: D }}>{fmt(total)}</div>
+                </div>
+                <button onClick={() => procesarCheckout(false)} disabled={processing} className="btn-gold" style={{ width: '100%', padding: 14, fontSize: 15 }}>
+                  {processing ? '⏳ Procesando...' : `Confirmar y Pagar → ${fmt(total)}`}
+                </button>
+                <div style={{ background: '#E8F5E9', borderRadius: 10, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8, marginTop: 14 }}>
+                  <span style={{ fontSize: 16 }}>✅</span>
+                  <span style={{ fontSize: 10, color: '#2E7D32' }}>Simulación de pago activa — El pedido se confirmará de inmediato</span>
+                </div>
               </div>
-              <button onClick={procesarCheckout} disabled={processing} className="btn-gold" style={{ width: '100%', padding: 14, fontSize: 15 }}>
-                {processing ? '⏳ Procesando...' : `Ir a Webpay → ${fmt(total)}`}
-              </button>
-              <div style={{ background: '#F0F4FF', borderRadius: 10, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8, marginTop: 14 }}>
-                <span style={{ fontSize: 16 }}>🔒</span>
-                <span style={{ fontSize: 10, color: '#5B6B8A' }}>Pago seguro procesado por Webpay — Transbank</span>
-              </div>
-              {error && <div style={{ color: '#E85D3A', fontSize: 12, marginTop: 10 }}>{error}</div>}
-            </div>
+            )}
+            {error && <div style={{ color: '#E85D3A', fontSize: 12, marginTop: 12, textAlign: 'center' }}>{error}</div>}
           </div>
         )}
       </div>
