@@ -82,18 +82,13 @@ export const register = (data) =>
 export const me = () => api('/auth/me');
 
 // Products
-export const getProducts = (venue_id, category) => {
+export const getProducts = (category) => {
   const params = new URLSearchParams();
-  if (venue_id) params.set('venue_id', venue_id);
   if (category) params.set('category', category);
   return api(`/products?${params}`);
 };
 
-export const getCategories = (venue_id) => api(`/products/categories/${venue_id}`);
-
-// Venues
-export const getVenue = (venue_id) => api(`/venues/${venue_id}`);
-export const getVenues = () => api(`/venues`);
+export const getCategories = () => api(`/products/categories`);
 
 // Orders
 export const createOrder = (data) =>

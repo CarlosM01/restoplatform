@@ -370,7 +370,6 @@ export default function AdminDashboard() {
                         <th style={{ padding: 12, textAlign: 'left', fontSize: 11, color: M }}>EMAIL</th>
                         <th style={{ padding: 12, textAlign: 'left', fontSize: 11, color: M }}>RUT</th>
                         <th style={{ padding: 12, textAlign: 'center', fontSize: 11, color: M }}>ROL</th>
-                        <th style={{ padding: 12, textAlign: 'center', fontSize: 11, color: M }}>SEDE</th>
                         <th style={{ padding: 12, textAlign: 'center', fontSize: 11, color: M }}>ESTADO</th>
                         <th style={{ padding: 12, textAlign: 'center', fontSize: 11, color: M }}>ACCIONES</th>
                       </tr>
@@ -496,7 +495,6 @@ export default function AdminDashboard() {
                                     {item.role}
                                   </span>
                                 </td>
-                                <td style={{ padding: 12, textAlign: 'center', fontSize: 11 }}>{item.venue_id || '—'}</td>
                                 <td style={{ padding: 12, textAlign: 'center' }}>
                                   {item.is_banned ? (
                                     <span style={{ background: '#FFEBEE', color: '#C62828', padding: '3px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600 }}>Baneado</span>
@@ -746,7 +744,6 @@ function UserModal({ user, onClose, onSaved }) {
     rut: user?.rut || '',
     password: '',
     role: user?.role || 'customer',
-    venue_id: user?.venue_id || '',
   });
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState(null);
@@ -760,13 +757,9 @@ function UserModal({ user, onClose, onSaved }) {
         if (form.name !== user.name) data.name = form.name;
         if (form.email !== user.email) data.email = form.email;
         if (form.role !== user.role) data.role = form.role;
-        if (form.venue_id !== user.venue_id) data.venue_id = form.venue_id ? +form.venue_id : null;
         await adminUpdateUser(user.id, data);
       } else {
-        await adminCreateUser({
-          ...form,
-          venue_id: form.venue_id ? +form.venue_id : null,
-        });
+        await adminCreateUser(form);
       }
       onSaved();
     } catch (e) {
@@ -800,9 +793,6 @@ function UserModal({ user, onClose, onSaved }) {
               <option value="admin">Admin</option>
             </select>
           </div>
-          {form.role === 'manager' && (
-            <div><label className="label">Sede ID</label><input type="number" className="input" value={form.venue_id} onChange={e => setForm({ ...form, venue_id: e.target.value })} placeholder="1" /></div>
-          )}
         </div>
 
         {err && <div style={{ background: '#FFEBEE', color: '#C62828', padding: 10, borderRadius: 8, fontSize: 12, marginTop: 10 }}>{err}</div>}

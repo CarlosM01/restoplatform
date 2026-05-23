@@ -4,10 +4,10 @@ from sqlalchemy import select
 from app.core.database import get_db
 from app.core.security import hash_password
 from app.deps import require_admin
-from app.models import User, Venue, Table, Role
+from app.models import User, Table, Role
 from app.schemas import (
     UserOut, UserAdminCreate, UserUpdate,
-    VenueCreate, VenueOut, TableCreate, TableOut,
+    TableCreate, TableOut,
 )
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -37,16 +37,12 @@ def crear_usuario(
     if db.scalar(select(User).where(User.rut == data.rut)):
         raise HTTPException(400, "RUT ya registrado")
 
-    if data.role == Role.MANAGER and not data.venue_id:
-        raise HTTPException(400, "Encargado debe tener venue_id asignada")
-
     user = User(
         rut=data.rut,
         email=data.email,
         name=data.name,
         password_hash=hash_password(data.password),
         role=data.role,
-        venue_id=data.venue_id,
     )
     db.add(user)
     db.commit()
@@ -119,25 +115,6 @@ def desbanear(
     return {"ok": True}
 
 
-# ============ SEDES ============
-@router.get("/sedes", response_model=list[VenueOut])
-def listar_sedes(db: Session = Depends(get_db), _: User = Depends(require_admin)):
-    return db.scalars(select(Venue)).all()
-
-
-@router.post("/sedes", response_model=VenueOut, status_code=201)
-def crear_sede(
-    data: VenueCreate,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_admin),
-):
-    s = Venue(**data.model_dump())
-    db.add(s)
-    db.commit()
-    db.refresh(s)
-    return s
-
-
 # ============ MESAS ============
 @router.post("/tables", response_model=TableOut, status_code=201)
 def crear_mesa(
@@ -154,11 +131,8 @@ def crear_mesa(
 
 @router.get("/tables", response_model=list[TableOut])
 def listar_mesas(
-    venue_id: int | None = None,
     db: Session = Depends(get_db),
     _: User = Depends(require_admin),
 ):
     q = select(Table)
-    if venue_id:
-        q = q.where(Table.venue_id == venue_id)
     return db.scalars(q).all()

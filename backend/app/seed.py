@@ -1,4 +1,4 @@
-"""Script de seed: crea users, sedes, tables y products iniciales.
+"""Script de seed: crea users, tables y products iniciales.
 
 Uso:
     python -m app.seed
@@ -6,29 +6,18 @@ Uso:
 from sqlalchemy import select
 from app.core.database import SessionLocal, engine, Base
 from app.core.security import hash_password
-from app.models import User, Venue, Table, Product, Inventory, Role
+from app.models import User, Table, Product, Inventory, Role
 
 
 def seed():
-    # Crear tablas si no existen (en desarrollo). En prod usar Alembic.
+    # Recrear tablas para desarrollo
+    print("Limpiando base de datos...")
+    Base.metadata.drop_all(bind=engine)
+    print("Creando tablas...")
     Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()
     try:
-        # ===== SEDES =====
-        if not db.scalar(select(Venue)):
-            print("Creando sedes...")
-            sede1 = Venue(
-                name="La Leña Temuco",
-                address="Av. Alemania 456, Temuco",
-                phone="+56912345678",
-            )
-            db.add(sede1)
-            db.commit()
-            db.refresh(sede1)
-        else:
-            sede1 = db.scalar(select(Venue))
-
         # ===== USUARIOS =====
         if not db.scalar(select(User).where(User.email == "admin@lalena.cl")):
             print("Creando users...")
@@ -45,7 +34,6 @@ def seed():
                 name="Carlos Encargado",
                 password_hash=hash_password("encargado123"),
                 role=Role.MANAGER,
-                venue_id=sede1.id,
             )
             customer = User(
                 rut="33333333-3",
@@ -62,7 +50,7 @@ def seed():
             print("Creando tables...")
             for i in range(1, 16):
                 cap = 2 if i <= 5 else (4 if i <= 10 else 6)
-                db.add(Table(number=i, venue_id=sede1.id, capacity=cap))
+                db.add(Table(number=i, capacity=cap))
             db.commit()
 
         # ===== PRODUCTOS =====
@@ -85,7 +73,6 @@ def seed():
                     price=price,
                     category=cat,
                     image=img,
-                    venue_id=sede1.id,
                 )
                 db.add(p)
                 db.flush()

@@ -16,14 +16,12 @@ class UserCreate(UserBase):
 
 class UserAdminCreate(UserCreate):
     role: Role = Role.CUSTOMER
-    venue_id: int | None = None
 
 
 class UserUpdate(BaseModel):
     name: str | None = None
     email: EmailStr | None = None
     role: Role | None = None
-    venue_id: int | None = None
     is_active: bool | None = None
     is_banned: bool | None = None
 
@@ -31,7 +29,6 @@ class UserUpdate(BaseModel):
 class UserOut(UserBase):
     id: int
     role: Role
-    venue_id: int | None
     is_active: bool
     is_banned: bool
     created_at: datetime
@@ -46,22 +43,7 @@ class Token(BaseModel):
     name: str
 
 
-# ============ SEDES ============
-class VenueBase(BaseModel):
-    name: str
-    address: str
-    phone: str
 
-
-class VenueCreate(VenueBase):
-    pass
-
-
-class VenueOut(VenueBase):
-    id: int
-    is_active: bool
-
-    model_config = ConfigDict(from_attributes=True)
 
 
 # ============ PRODUCTOS ============
@@ -77,7 +59,6 @@ class ProductBase(BaseModel):
     price: float = Field(..., gt=0)
     category: str
     image: str = ""
-    venue_id: int
 
 
 class ProductCreate(ProductBase):
@@ -108,7 +89,6 @@ class StockUpdate(BaseModel):
 # ============ MESAS ============
 class TableBase(BaseModel):
     number: int
-    venue_id: int
     capacity: int = 4
 
 
@@ -132,8 +112,6 @@ class OrderItemCreate(BaseModel):
 
 
 class OrderCreate(BaseModel):
-    venue_id: int
-
     items: list[OrderItemCreate]
 
 
@@ -148,7 +126,6 @@ class OrderItemOut(BaseModel):
 class OrderOut(BaseModel):
     id: int
     customer_id: int
-    venue_id: int
 
     total: float
     status: OrderStatus

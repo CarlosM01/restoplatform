@@ -101,7 +101,7 @@ export default function ManagerDashboard() {
         {tab === 'orders' && (
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22 }}>Pedidos de la sede</h2>
+              <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22 }}>Pedidos del Restaurante</h2>
               <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="input" style={{ width: 200 }}>
                 <option value="">Todos los estados</option>
                 {Object.entries(ESTADO_LABEL).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}

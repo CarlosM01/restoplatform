@@ -11,25 +11,22 @@ router = APIRouter(prefix="/products", tags=["products"])
 
 @router.get("", response_model=list[ProductOut])
 def listar(
-    venue_id: int | None = None,
     category: str | None = None,
     db: Session = Depends(get_db),
 ):
     """Listado público de products activos"""
     q = select(Product).options(joinedload(Product.inventory)).where(Product.is_active == True)
-    if venue_id:
-        q = q.where(Product.venue_id == venue_id)
     if category and category != "Todos":
         q = q.where(Product.category == category)
     return db.scalars(q).all()
 
 
-@router.get("/categories/{venue_id}", response_model=list[str])
-def listar_categorias(venue_id: int, db: Session = Depends(get_db)):
-    """Returns distinct active product categories for a venue"""
+@router.get("/categories", response_model=list[str])
+def listar_categorias(db: Session = Depends(get_db)):
+    """Returns distinct active product categories"""
     cats = db.scalars(
         select(Product.category)
-        .where(Product.venue_id == venue_id, Product.is_active == True)
+        .where(Product.is_active == True)
         .distinct()
         .order_by(Product.category)
     ).all()
@@ -50,17 +47,12 @@ def crear(
     db: Session = Depends(get_db),
     user: User = Depends(require_encargado),
 ):
-    # Encargado solo puede crear en su venue
-    if user.role == Role.MANAGER and user.venue_id != data.venue_id:
-        raise HTTPException(403, "No puedes crear products en otra venue")
-
     p = Product(
         name=data.name,
         description=data.description,
         price=data.price,
         category=data.category,
         image=data.image,
-        venue_id=data.venue_id,
     )
     db.add(p)
     db.flush()
@@ -80,8 +72,6 @@ def actualizar(
     p = db.get(Product, product_id)
     if not p:
         raise HTTPException(404)
-    if user.role == Role.MANAGER and user.venue_id != p.venue_id:
-        raise HTTPException(403, "Product no es de tu venue")
 
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(p, field, value)
@@ -100,8 +90,6 @@ def actualizar_stock(
     p = db.get(Product, product_id)
     if not p:
         raise HTTPException(404)
-    if user.role == Role.MANAGER and user.venue_id != p.venue_id:
-        raise HTTPException(403)
 
     if not p.inventory:
         p.inventory = Inventory(product_id=p.id, stock=0)

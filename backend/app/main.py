@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import engine
 from app.models import Base
-from app.routers import auth, products, orders, payments, admin, venues, menu_admin
+from app.routers import auth, products, orders, payments, admin, menu_admin
 
 
 @asynccontextmanager
@@ -35,7 +35,6 @@ app.include_router(orders.router)
 
 app.include_router(payments.router)
 app.include_router(admin.router)
-app.include_router(venues.router)
 app.include_router(menu_admin.router)
 
 

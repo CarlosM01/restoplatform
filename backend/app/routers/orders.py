@@ -46,7 +46,6 @@ def crear_pedido(
 
     order = Order(
         customer_id=user.id,
-        venue_id=data.venue_id,
         total=total,
         status=OrderStatus.PENDING,
     )
@@ -85,10 +84,8 @@ def pedidos_sede(
     db: Session = Depends(get_db),
     user: User = Depends(require_encargado),
 ):
-    """Encargado ve orders de su venue. Admin ve todos."""
+    """Encargado ve orders de su venue (ahora todos). Admin ve todos."""
     q = select(Order).order_by(Order.created_at.desc())
-    if user.role == Role.MANAGER:
-        q = q.where(Order.venue_id == user.venue_id)
     if status:
         q = q.where(Order.status == status)
     return db.scalars(q).all()
@@ -105,8 +102,6 @@ def obtener(
         raise HTTPException(404)
     if user.role == Role.CUSTOMER and p.customer_id != user.id:
         raise HTTPException(403, "No puedes ver orders de otros clientes")
-    if user.role == Role.MANAGER and p.venue_id != user.venue_id:
-        raise HTTPException(403, "Order no es de tu venue")
     return p
 
 
@@ -119,8 +114,6 @@ def confirmar(
     p = db.get(Order, order_id)
     if not p:
         raise HTTPException(404)
-    if user.role == Role.MANAGER and p.venue_id != user.venue_id:
-        raise HTTPException(403)
     if p.status in (OrderStatus.CANCELED, OrderStatus.DELIVERED):
         raise HTTPException(400, f"Order en status {p.status.value} no se puede confirmar")
     p.status = OrderStatus.CONFIRMED
@@ -132,8 +125,6 @@ def confirmar(
 def preparar(order_id: int, db: Session = Depends(get_db), user: User = Depends(require_encargado)):
     p = db.get(Order, order_id)
     if not p: raise HTTPException(404)
-    if user.role == Role.MANAGER and p.venue_id != user.venue_id:
-        raise HTTPException(403)
     p.status = OrderStatus.IN_PREPARATION
     db.commit()
     return {"ok": True}
@@ -143,8 +134,6 @@ def preparar(order_id: int, db: Session = Depends(get_db), user: User = Depends(
 def listo(order_id: int, db: Session = Depends(get_db), user: User = Depends(require_encargado)):
     p = db.get(Order, order_id)
     if not p: raise HTTPException(404)
-    if user.role == Role.MANAGER and p.venue_id != user.venue_id:
-        raise HTTPException(403)
     p.status = OrderStatus.READY
     db.commit()
     return {"ok": True}
@@ -154,8 +143,6 @@ def listo(order_id: int, db: Session = Depends(get_db), user: User = Depends(req
 def entregar(order_id: int, db: Session = Depends(get_db), user: User = Depends(require_encargado)):
     p = db.get(Order, order_id)
     if not p: raise HTTPException(404)
-    if user.role == Role.MANAGER and p.venue_id != user.venue_id:
-        raise HTTPException(403)
     p.status = OrderStatus.DELIVERED
     db.commit()
     return {"ok": True}
@@ -169,8 +156,6 @@ def cancelar(
 ):
     p = db.get(Order, order_id)
     if not p: raise HTTPException(404)
-    if user.role == Role.MANAGER and p.venue_id != user.venue_id:
-        raise HTTPException(403)
     if p.status == OrderStatus.CANCELED:
         raise HTTPException(400, "Ya está cancelado")
 

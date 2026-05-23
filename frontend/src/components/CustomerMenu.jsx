@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   getProducts, createOrder,
   initPayment, getUser, clearAuth, fmt,
-  getVenue, getCategories,
+  getCategories,
 } from '../lib/api.js';
 
 const STEPS = ['menu', 'cart', 'payment'];
@@ -14,7 +14,6 @@ export default function CustomerMenu() {
   const [step, setStep] = useState('menu');
   const [products, setProducts] = useState([]);
   const [cats, setCats] = useState([]);
-  const [sedeId, setSedeId] = useState(null);
   const [cat, setCat] = useState('Todos');
   const [cart, setCart] = useState([]);
   const [flash, setFlash] = useState(null);
@@ -27,17 +26,11 @@ export default function CustomerMenu() {
   useEffect(() => {
     setUser(getUser());
 
-    // Resolve venue_id from URL params, default to 1
-    const params = new URLSearchParams(window.location.search);
-    const sid = parseInt(params.get('sede') || '1', 10);
-    setSedeId(sid);
-
     Promise.all([
-      getProducts(sid),
-      getVenue(sid),
-      getCategories(sid),
+      getProducts(),
+      getCategories(),
     ])
-      .then(([p, sede, categorias]) => {
+      .then(([p, categorias]) => {
         setProducts(p);
         setCats(['Todos', ...categorias]);
       })
@@ -80,7 +73,6 @@ export default function CustomerMenu() {
     try {
       // 1. Crear pedido
       const pedido = await createOrder({
-        venue_id: sedeId,
         items: cart.map(c => ({ product_id: c.id, quantity: c.qty })),
       });
 

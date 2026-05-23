@@ -25,22 +25,6 @@ class PaymentStatus(str, Enum):
     PAID = "pagado"
     REJECTED = "rechazado"
     REFUNDED = "reembolsado"
-
-
-class Venue(Base):
-    __tablename__ = "venues"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(100))
-    address: Mapped[str] = mapped_column(String(200))
-    phone: Mapped[str] = mapped_column(String(20))
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-
-
-    users: Mapped[list["User"]] = relationship(back_populates="venue")
-    products: Mapped[list["Product"]] = relationship(back_populates="venue")
-
-
-
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -49,12 +33,10 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     name: Mapped[str] = mapped_column(String(100))
     role: Mapped[Role] = mapped_column(SQLEnum(Role), default=Role.CUSTOMER)
-    venue_id: Mapped[int | None] = mapped_column(ForeignKey("venues.id"), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_banned: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    venue: Mapped["Venue | None"] = relationship(back_populates="users")
     orders: Mapped[list["Order"]] = relationship(back_populates="customer")
 
 
@@ -66,10 +48,8 @@ class Product(Base):
     price: Mapped[float] = mapped_column(Float)
     category: Mapped[str] = mapped_column(String(50))
     image: Mapped[str] = mapped_column(String(255), default="")
-    venue_id: Mapped[int] = mapped_column(ForeignKey("venues.id"))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    venue: Mapped["Venue"] = relationship(back_populates="products")
     inventory: Mapped["Inventory | None"] = relationship(back_populates="product", uselist=False, cascade="all, delete-orphan")
 
 
@@ -87,11 +67,8 @@ class Table(Base):
     __tablename__ = "tables"
     id: Mapped[int] = mapped_column(primary_key=True)
     number: Mapped[int] = mapped_column(Integer)
-    venue_id: Mapped[int] = mapped_column(ForeignKey("venues.id"))
     capacity: Mapped[int] = mapped_column(Integer, default=4)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-
-    venue: Mapped["Venue"] = relationship()
 
 
 
@@ -101,7 +78,6 @@ class Order(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     customer_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    venue_id: Mapped[int] = mapped_column(ForeignKey("venues.id"))
     total: Mapped[float] = mapped_column(Float)
     status: Mapped[OrderStatus] = mapped_column(SQLEnum(OrderStatus), default=OrderStatus.PENDING)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
