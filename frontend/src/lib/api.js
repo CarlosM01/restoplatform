@@ -104,12 +104,6 @@ export const venueOrders = (status) =>
 export const changeOrderStatus = (id, action) =>
   api(`/orders/${id}/${action}`, { method: 'PATCH' });
 
-// Reservations
-export const getTables = (venue_id) => api(`/reservations/tables/${venue_id}`);
-export const checkAvailability = (venue_id, date) =>
-  api(`/reservations/availability/${venue_id}?date=${encodeURIComponent(date)}`);
-export const createReservation = (data) =>
-  api('/reservations', { method: 'POST', body: JSON.stringify(data) });
 
 // Payments
 export const initPayment = (order_id) =>

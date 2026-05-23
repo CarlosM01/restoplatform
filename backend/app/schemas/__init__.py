@@ -60,7 +60,7 @@ class VenueCreate(VenueBase):
 class VenueOut(VenueBase):
     id: int
     is_active: bool
-    reservation_hours: list[str] | None = None
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -122,23 +122,7 @@ class TableOut(TableBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-# ============ RESERVAS ============
-class ReservationCreate(BaseModel):
-    table_id: int
-    venue_id: int
-    date: datetime
-    guests_count: int = Field(..., ge=1, le=20)
 
-
-class ReservationOut(BaseModel):
-    id: int
-    customer_id: int
-    table_id: int
-    venue_id: int
-    date: datetime
-    guests_count: int
-    status: str
-    model_config = ConfigDict(from_attributes=True)
 
 
 # ============ PEDIDOS ============
@@ -149,7 +133,7 @@ class OrderItemCreate(BaseModel):
 
 class OrderCreate(BaseModel):
     venue_id: int
-    reservation_id: int | None = None
+
     items: list[OrderItemCreate]
 
 
@@ -165,7 +149,7 @@ class OrderOut(BaseModel):
     id: int
     customer_id: int
     venue_id: int
-    reservation_id: int | None
+
     total: float
     status: OrderStatus
     created_at: datetime

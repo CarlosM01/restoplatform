@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
-  getProducts, getTables, createReservation, createOrder,
+  getProducts, createOrder,
   initPayment, getUser, clearAuth, fmt,
   getVenue, getCategories,
 } from '../lib/api.js';
 
-const STEPS = ['menu', 'reserve', 'cart', 'payment'];
+const STEPS = ['menu', 'cart', 'payment'];
 
 const G = '#C4A97D', D = '#1B1916', M = '#A89B8C', B = '#F0EBE4', BG = '#FFF8F0';
 
@@ -13,19 +13,11 @@ export default function CustomerMenu() {
   const [user, setUser] = useState(null);
   const [step, setStep] = useState('menu');
   const [products, setProducts] = useState([]);
-  const [tables, setTables] = useState([]);
   const [cats, setCats] = useState([]);
-  const [times, setTimes] = useState([]);
   const [sedeId, setSedeId] = useState(null);
   const [cat, setCat] = useState('Todos');
   const [cart, setCart] = useState([]);
   const [flash, setFlash] = useState(null);
-
-  // Reserva
-  const [tbl, setTbl] = useState(null);
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [guests, setGuests] = useState(2);
 
   // UI
   const [loading, setLoading] = useState(true);
@@ -42,14 +34,11 @@ export default function CustomerMenu() {
 
     Promise.all([
       getProducts(sid),
-      getTables(sid),
       getVenue(sid),
       getCategories(sid),
     ])
-      .then(([p, m, sede, categorias]) => {
+      .then(([p, sede, categorias]) => {
         setProducts(p);
-        setTables(m);
-        setTimes(sede.horarios_reserva || []);
         setCats(['Todos', ...categorias]);
       })
       .catch((e) => setError(e.message))
@@ -77,7 +66,6 @@ export default function CustomerMenu() {
   const stepIdx = STEPS.indexOf(step);
   const canNext = {
     menu: cnt > 0,
-    reserve: tbl && date && time,
     cart: cnt > 0,
     payment: false, // payment se maneja distinto
   };
@@ -90,26 +78,16 @@ export default function CustomerMenu() {
     }
     setProcessing(true);
     try {
-      // 1. Crear reserva
-      const fechaReserva = new Date(`${date}T${time}:00`).toISOString();
-      const reserva = await createReservation({
-        table_id: tbl,
-        venue_id: sedeId,
-        date: fechaReserva,
-        guests_count: guests,
-      });
-
-      // 2. Crear pedido
+      // 1. Crear pedido
       const pedido = await createOrder({
         venue_id: sedeId,
-        reservation_id: reserva.id,
         items: cart.map(c => ({ product_id: c.id, quantity: c.qty })),
       });
 
-      // 3. Iniciar payment Webpay
+      // 2. Iniciar payment Webpay
       const payment = await initPayment(pedido.id);
 
-      // 4. Submit a Webpay (form POST con token_ws)
+      // 3. Submit a Webpay (form POST con token_ws)
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = payment.url;
@@ -155,11 +133,11 @@ export default function CustomerMenu() {
       {/* Progress */}
       <div style={{ background: '#FFF', padding: '12px 18px 10px', borderBottom: `1px solid ${B}` }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {['Menú', 'Reserva', 'Carrito', 'Pago'].map((label, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', flex: i < 3 ? 1 : 'none' }}>
+          {['Menú', 'Carrito', 'Pago'].map((label, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', flex: i < 2 ? 1 : 'none' }}>
               <div style={{ width: 26, height: 26, borderRadius: 13, background: stepIdx >= i ? G : '#EDE8E0', color: stepIdx >= i ? '#fff' : M, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
               <span style={{ fontSize: 10, fontWeight: stepIdx === i ? 700 : 400, color: stepIdx >= i ? D : M, marginLeft: 4, whiteSpace: 'nowrap' }}>{label}</span>
-              {i < 3 && <div style={{ flex: 1, height: 2, background: stepIdx > i ? G : '#EDE8E0', margin: '0 8px', borderRadius: 1 }} />}
+              {i < 2 && <div style={{ flex: 1, height: 2, background: stepIdx > i ? G : '#EDE8E0', margin: '0 8px', borderRadius: 1 }} />}
             </div>
           ))}
         </div>
@@ -171,7 +149,7 @@ export default function CustomerMenu() {
           <div>
             <div style={{ padding: '14px 18px 6px' }}>
               <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4 }}>Elige tus platos</div>
-              <div style={{ fontSize: 11, color: M, marginBottom: 10 }}>Selecciona lo que quieres pedir y avanza a reservar tu mesa.</div>
+              <div style={{ fontSize: 11, color: M, marginBottom: 10 }}>Selecciona lo que quieres pedir y avanza al carrito.</div>
               <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 8 }}>
                 {cats.map(c => (
                   <button key={c} onClick={() => setCat(c)} style={{ padding: '6px 13px', borderRadius: 18, border: cat === c ? 'none' : '1px solid #DDD6CC', background: cat === c ? D : '#FFF', color: cat === c ? '#FFF' : '#6B6560', fontSize: 11, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' }}>{c}</button>
@@ -210,57 +188,11 @@ export default function CustomerMenu() {
           </div>
         )}
 
-        {/* STEP RESERVE */}
-        {step === 'reserve' && (
-          <div style={{ padding: 18 }}>
-            <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 3 }}>Configura tu reserva</div>
-            <div style={{ fontSize: 11, color: M, marginBottom: 16 }}>Elige fecha, hora, personas y tu mesa preferida.</div>
-            <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
-              <div style={{ flex: 1 }}>
-                <label className="label">Fecha</label>
-                <input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="label">Hora</label>
-                <select className="input" value={time} onChange={e => setTime(e.target.value)}>
-                  <option value="">Elegir...</option>
-                  {times.map(t => <option key={t}>{t}</option>)}
-                </select>
-              </div>
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label className="label">Personas: <strong style={{ color: D, fontSize: 15 }}>{guests}</strong></label>
-              <input type="range" min={1} max={12} value={guests} onChange={e => setGuests(+e.target.value)} style={{ width: '100%', accentColor: G, marginTop: 6 }} />
-            </div>
-            <label className="label" style={{ marginBottom: 8 }}>Selecciona mesa</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 7, marginBottom: 6 }}>
-              {tables.filter(m => m.is_active).map(m => {
-                const sel = tbl === m.id;
-                return (
-                  <button key={m.id} onClick={() => setTbl(m.id)}
-                    style={{ padding: '10px 0', borderRadius: 10, border: sel ? `2px solid ${G}` : '1px solid #DDD6CC', background: sel ? BG : '#FFF', color: D, fontWeight: sel ? 700 : 500, fontSize: 13, cursor: 'pointer' }}>
-                    {m.number}
-                    <div style={{ fontSize: 8, color: M }}>{m.capacity} pers.</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {/* STEP CART */}
         {step === 'cart' && (
           <div style={{ padding: 18 }}>
             <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 3 }}>Resumen del pedido</div>
             <div style={{ fontSize: 11, color: M, marginBottom: 16 }}>Revisa antes de pagar con Webpay.</div>
-
-            <div style={{ background: BG, borderRadius: 14, padding: 14, marginBottom: 14, border: `1px solid ${B}` }}>
-              <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 8, color: G }}>📅 RESERVA</div>
-              <div style={{ fontSize: 12, color: '#6B6560', lineHeight: 1.8 }}>
-                <strong style={{ color: D }}>{date}</strong> a las <strong style={{ color: D }}>{time}</strong><br />
-                Mesa <strong style={{ color: D }}>{tables.find(m => m.id === tbl)?.number}</strong> · {guests} personas
-              </div>
-            </div>
 
             <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 8, color: G }}>🍽️ PRODUCTOS</div>
             {cart.map(c => (
@@ -322,7 +254,6 @@ export default function CustomerMenu() {
             style={{ flex: 1, padding: 12, fontWeight: 700 }}
           >
             {step === 'menu' && `Siguiente — ${cnt} ${cnt === 1 ? 'plato' : 'platos'} (${fmt(total)})`}
-            {step === 'reserve' && 'Siguiente — Revisar pedido'}
             {step === 'cart' && `Ir a pagar — ${fmt(total)}`}
           </button>
         )}

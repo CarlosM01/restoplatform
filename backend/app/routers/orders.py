@@ -47,7 +47,6 @@ def crear_pedido(
     order = Order(
         customer_id=user.id,
         venue_id=data.venue_id,
-        reservation_id=data.reservation_id,
         total=total,
         status=OrderStatus.PENDING,
     )

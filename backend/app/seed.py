@@ -22,10 +22,6 @@ def seed():
                 name="La Leña Temuco",
                 address="Av. Alemania 456, Temuco",
                 phone="+56912345678",
-                reservation_hours=[
-                    "12:00", "12:30", "13:00", "13:30", "14:00",
-                    "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00",
-                ],
             )
             db.add(sede1)
             db.commit()

@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Boolean, Enum as SQLEnum, JSON
+from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Boolean, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
@@ -34,11 +34,11 @@ class Venue(Base):
     address: Mapped[str] = mapped_column(String(200))
     phone: Mapped[str] = mapped_column(String(20))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    reservation_hours: Mapped[list | None] = mapped_column(JSON, nullable=True, default=None)
+
 
     users: Mapped[list["User"]] = relationship(back_populates="venue")
     products: Mapped[list["Product"]] = relationship(back_populates="venue")
-    tables: Mapped[list["Table"]] = relationship(back_populates="venue")
+
 
 
 class User(Base):
@@ -91,26 +91,16 @@ class Table(Base):
     capacity: Mapped[int] = mapped_column(Integer, default=4)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    venue: Mapped["Venue"] = relationship(back_populates="tables")
+    venue: Mapped["Venue"] = relationship()
 
 
-class Reservation(Base):
-    __tablename__ = "reservations"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    customer_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    table_id: Mapped[int] = mapped_column(ForeignKey("tables.id"))
-    venue_id: Mapped[int] = mapped_column(ForeignKey("venues.id"))
-    date: Mapped[datetime] = mapped_column(DateTime)
-    guests_count: Mapped[int] = mapped_column(Integer)
-    status: Mapped[str] = mapped_column(String(20), default="confirmada")
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
 class Order(Base):
     __tablename__ = "orders"
     id: Mapped[int] = mapped_column(primary_key=True)
     customer_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    reservation_id: Mapped[int | None] = mapped_column(ForeignKey("reservations.id"), nullable=True)
+
     venue_id: Mapped[int] = mapped_column(ForeignKey("venues.id"))
     total: Mapped[float] = mapped_column(Float)
     status: Mapped[OrderStatus] = mapped_column(SQLEnum(OrderStatus), default=OrderStatus.PENDING)
