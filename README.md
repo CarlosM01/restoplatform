@@ -1,188 +1,183 @@
 # RestoPlatform 🍽️
 
-ERP/SaaS para restaurantes PYME. Stack completo con FastAPI + SQLAlchemy + Astro + React + Webpay + Directus CMS.
+ERP/SaaS para restaurantes PYME. Stack completo moderno con FastAPI + SQLAlchemy + Astro + React + Directus CMS.
 
-## 📦 Stack
+Este proyecto ha sido optimizado y simplificado para ofrecer un **flujo de compra de alta velocidad para un único local**, incluyendo la opción de **Checkout para Invitados (Guest Checkout)**, la eliminación del complejo sistema de reservas anterior para agilizar los pedidos, y un **bypass de pagos integrado** que simula transacciones instantáneas para facilitar el desarrollo y pruebas locales.
 
-- **Backend**: FastAPI 0.115, SQLAlchemy 2.0, Alembic, PostgreSQL 16
-- **Frontend**: Astro 4 + React 18, CSS vanilla con design tokens
-- **Pagos**: Transbank Webpay Plus (modo integración)
-- **CMS Admin**: Directus 11 (opcional, para gestión visual de productos/usuarios)
-- **Roles**: Cliente, Encargado (por sede), Admin (dueño)
+---
 
-## 🚀 Inicio rápido con Docker (recomendado)
+## 📦 Stack Tecnológico
 
+- **Backend**: FastAPI 0.115, SQLAlchemy 2.0, Alembic, PostgreSQL 16 (ejecutado en Docker)
+- **Frontend**: Astro 4 + React 18, CSS vanilla estructurado con design tokens adaptativos.
+- **Simulador de Pagos**: Bypass directo de Transbank Webpay Plus para confirmación inmediata de pedidos locales.
+- **CMS Admin**: Directus 11 (opcional, para gestión visual integrada de productos, inventarios y usuarios).
+- **Arquitectura**: Simplificada a local único (Single-Venue), reduciendo la complejidad de múltiples sedes.
+
+---
+
+## 🚀 Inicio rápido (Recomendado)
+
+Utiliza los comandos del `Makefile` para automatizar y estandarizar el levantamiento de los servicios y base de datos en Docker:
+
+### 1. Levantar servicios principales (Base de Datos, API Backend y Directus)
 ```bash
-# Levantar todo el stack
-docker compose up -d
+make up
+```
+*Esto iniciará la base de datos PostgreSQL, el contenedor de la API de FastAPI y el panel de Directus CMS en segundo plano.*
 
-# Esperar ~15 segundos para que la BD inicialice
-
-# Cargar los datos de prueba / iniciales (seed)
+### 2. Inicializar base de datos y cargar semilla de datos (Seed)
+```bash
 make db-seed
-
-# Verificar
-curl http://localhost:8000/health
 ```
+*Este comando limpiará las tablas antiguas de la base de datos, aplicará el esquema y cargará usuarios de prueba, mesas e inventario de platos.*
 
-Luego solo levantar el frontend (no está en Docker para que tengas hot reload):
-
+### 3. Instalar y arrancar el Frontend (Localmente en tu host)
 ```bash
-cd frontend
-cp .env.example .env
-npm install
-npm run dev
+# Instalar paquetes de npm
+make frontend-install
+
+# Iniciar servidor de desarrollo Astro (Hot-Reloading)
+make frontend-dev
 ```
 
-Abrir:
-- **Cliente**: http://localhost:4321
-- **Login**: http://localhost:4321/login
-- **Encargado**: http://localhost:4321/encargado
-- **Admin**: http://localhost:4321/admin
-- **API docs**: http://localhost:8000/docs
-- **Directus CMS**: http://localhost:8055
+### 🔗 Direcciones del Entorno Local
 
-## 👥 Usuarios de prueba (creados por el seed)
+Una vez levantado todo, puedes acceder a las siguientes URLs:
+- **Catálogo de Clientes**: [http://localhost:4321](http://localhost:4321)
+- **Dashboard de Encargado/Manager**: [http://localhost:4321/encargado](http://localhost:4321/encargado)
+- **Panel de Administración**: [http://localhost:4321/admin](http://localhost:4321/admin)
+- **Acceso / Login único**: [http://localhost:4321/login](http://localhost:4321/login)
+- **Documentación Interactiva API (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Directus CMS**: [http://localhost:8055](http://localhost:8055) (Email: `admin@lalena.cl` / Clave: `admin123`)
 
-| Rol | Email | Password |
-|---|---|---|
-| Admin | admin@lalena.cl | admin123 |
-| Encargado | encargado@lalena.cl | encargado123 |
-| Cliente | cliente@test.cl | cliente123 |
+---
 
-## 🛠️ Setup manual (sin Docker)
+## 👥 Usuarios de prueba (Creados por el Seed)
 
-### Backend
+| Rol | Email | Contraseña | Descripción / Alcance |
+|---|---|---|---|
+| **Admin** | `admin@lalena.cl` | `admin123` | Control total del sistema, CRUD de usuarios, bloqueo y ban |
+| **Encargado (Manager)** | `encargado@lalena.cl` | `encargado123` | Gestión de stock, visualización y actualización de pedidos del restaurante |
+| **Cliente** | `customer@test.cl` | `cliente123` | Usuario registrado para seguimiento de pedidos e historial |
+| **Invitado (Guest)** | *No requiere* | *No requiere* | Checkout rápido sin registro directo en la interfaz de pago |
 
-```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate          # Linux/Mac
-# .venv\Scripts\activate            # Windows
-pip install -r requirements.txt
-cp .env.example .env
+---
 
-# PostgreSQL debe estar corriendo en localhost:5432
-# Crear DB: createdb restoplatform
+## 🛠️ Setup Manual (Sin Docker)
 
-# Opción A: Usar Alembic (recomendado para prod)
-alembic revision --autogenerate -m "init"
-alembic upgrade head
+Si prefieres ejecutar el Backend directamente en tu sistema local en lugar de Docker:
 
-# Opción B: Auto-crear tablas + seed (dev)
-python -m app.seed
+### Backend Manual
 
-# Levantar
-uvicorn app.main:app --reload
-```
+1. Tener corriendo un servidor PostgreSQL en `localhost:5432` con una base de datos llamada `restoplatform`.
+2. Crear tu entorno virtual de Python e instalar requerimientos:
+   ```bash
+   cd backend
+   python -m venv .venv
+   source .venv/bin/activate  # En Windows usa: .venv\Scripts\activate
+   pip install -r requirements.txt
+   cp .env.example .env
+   ```
+3. Ejecutar esquema y seed de base de datos:
+   ```bash
+   python -m app.seed
+   ```
+4. Levantar servidor local de desarrollo:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
 
-### Frontend
+---
 
-```bash
-cd frontend
-cp .env.example .env
-npm install
-npm run dev
-```
-
-## 🗂️ Estructura
+## 🗂️ Estructura del Repositorio
 
 ```
 restoplatform/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py              # FastAPI entry
-│   │   ├── core/                # config, db, security
-│   │   ├── models/              # SQLAlchemy ORM
-│   │   ├── schemas/             # Pydantic
-│   │   ├── routers/             # endpoints REST
-│   │   ├── deps.py              # auth + RBAC
-│   │   └── seed.py              # datos iniciales
-│   ├── alembic/                 # migraciones
+│   │   ├── main.py              # Punto de entrada de la API FastAPI
+│   │   ├── core/                # Configuración global, base de datos y seguridad
+│   │   ├── models/              # Modelos de SQLAlchemy ORM (User, Product, Order, etc.)
+│   │   ├── schemas/             # Esquemas de validación Pydantic
+│   │   ├── routers/             # Módulos y rutas REST (auth, orders, payments, products, admin)
+│   │   ├── deps.py              # Dependencias FastAPI (autenticación y roles)
+│   │   └── seed.py              # Script semilla de inicialización y carga de platos
+│   ├── alembic/                 # Directorio de control de migraciones
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── pages/               # rutas Astro
-│   │   ├── components/          # React (islas interactivas)
-│   │   ├── layouts/
-│   │   ├── lib/api.js           # cliente HTTP
-│   │   └── styles/global.css    # design system
+│   │   ├── pages/               # Páginas y enrutamiento nativo Astro (layouts estáticos y vistas)
+│   │   ├── components/          # Islas interactivas React (CustomerMenu, AdminDashboard, etc.)
+│   │   ├── layouts/             # Contenedor global de layouts HTML
+│   │   ├── lib/api.js           # Cliente centralizado de llamadas HTTP a la API
+│   │   └── styles/global.css    # Sistema de diseño, paleta de colores y tokens CSS
 │   └── astro.config.mjs
-└── docker-compose.yml
+├── docs/
+│   └── menu_schema.md           # Diagrama y documentación de la base de datos de menús
+├── Makefile                     # Herramientas estandarizadas de despliegue y desarrollo
+├── docker-compose.yml           # Definición de contenedores (Postgres, Directus)
+└── README.md                    # Documentación principal
 ```
 
-## 🔐 Roles y permisos
+---
 
-| Acción | Cliente | Encargado | Admin |
-|---|:-:|:-:|:-:|
-| Ver catálogo | ✅ | ✅ | ✅ |
-| Crear pedido | ✅ | ✅ | ✅ |
-| Pagar con Webpay | ✅ | ✅ | ✅ |
-| Ver pedidos de su sede | — | ✅ | ✅ |
-| Confirmar/cancelar pedidos | — | ✅ (su sede) | ✅ |
-| Modificar stock | — | ✅ (su sede) | ✅ |
-| CRUD productos | — | ✅ (su sede) | ✅ |
-| CRUD usuarios | — | — | ✅ |
-| Banear usuarios | — | — | ✅ |
-| Asignar encargados a sedes | — | — | ✅ |
+## 🔐 Matriz de Roles y Permisos
 
-## 💳 Webpay (Transbank)
+| Acción | Invitado | Cliente Registrado | Encargado | Admin |
+|---|:-:|:-:|:-:|:-:|
+| Ver catálogo | ✅ | ✅ | ✅ | ✅ |
+| Crear pedido | ✅ | ✅ | ✅ | ✅ |
+| Checkout sin cuenta | ✅ | ✅ | ✅ | ✅ |
+| Pago simulado automático | ✅ | ✅ | ✅ | ✅ |
+| Ver historial propio | — | ✅ | ✅ | ✅ |
+| Ver panel de pedidos del local | — | — | ✅ | ✅ |
+| Cambiar estado de pedidos (preparando/listo) | — | — | ✅ | ✅ |
+| Modificar stock / inventario de platos | — | — | ✅ | ✅ |
+| CRUD de menú (Categorías, Productos, Variantes) | — | — | ✅ | ✅ |
+| Gestión completa de usuarios (CRUD) | — | — | — | ✅ |
+| Banear / Desactivar usuarios | — | — | — | ✅ |
 
-Las credenciales del `.env.example` son las de **integración pública** de Transbank — sirven para pruebas con tarjetas test.
+---
 
-**Tarjetas de prueba:**
-- VISA aprobado: `4051 8856 0044 6623` · CVV `123` · vence `cualquier futuro`
-- MASTERCARD aprobado: `5186 0595 5959 0568` · CVV `123`
-- Rechazada: `4051 8842 3993 7763`
+## 💳 Simulación e Integración de Pagos
 
-[Documentación Transbank](https://transbankdevelopers.cl/documentacion/webpay-plus)
+Para acelerar las pruebas del flujo de compra y la experiencia de usuario (UX) local, las transacciones se realizan mediante un **bypass de pagos simulado**:
 
-Para producción reemplazar `commerce_code`, `api_key` y cambiar `IntegrationType.TEST` → `IntegrationType.LIVE` en `app/routers/pagos.py`.
+- Al presionar **"Confirmar y Pagar"** (registrado) o **"Pagar como Invitado"** (invitado), el frontend invoca `/payments/init/{order_id}`.
+- El backend crea directamente una transacción marcada como **Pagada (`pagado`)** y actualiza el pedido a **Confirmado (`confirmado`)**, reservando el stock del inventario.
+- La respuesta retorna una redirección automática e inmediata al cliente hacia el resultado exitoso en `/payment/result?status=exitoso&pedido={id}`.
 
-## 🎨 Directus CMS (opcional pero recomendado)
+> [!NOTE]
+> La infraestructura para reconectar una pasarela real como **Transbank Webpay Plus** permanece disponible en la arquitectura. Para reactivar el flujo externo original, se debe configurar el `commerce_code` y `api_key` en `backend/app/routers/payments.py` y actualizar el callback de retorno en `frontend/src/pages/payment/return.astro`.
 
-Directus se conecta a la misma base PostgreSQL y te da un panel admin visual gratis. Ideal para que el dueño/admin gestione productos, usuarios, sedes sin tocar código.
+---
 
-1. Levantar con docker-compose (ya viene incluido)
-2. Entrar a http://localhost:8055
-3. Login: admin@lalena.cl / admin123
-4. Configurar permisos por colección desde Settings → Roles & Permissions
-5. (Opcional) Crear roles personalizados que mapean a tus roles de la app
+## 🎨 Directus CMS (Opcional)
 
-## 🧪 Testing rápido
+Directus se conecta de manera transparente a la misma instancia de PostgreSQL que la API FastAPI, ofreciendo una consola visual de control:
 
-Probar el flujo completo:
+1. Ingresa a [http://localhost:8055](http://localhost:8055).
+2. Credenciales: `admin@lalena.cl` / `admin123`.
+3. Permite la visualización rápida de la data, modificación directa de stock y supervisión del estado físico de las mesas cargadas en el restaurante.
 
-1. Entrar a http://localhost:4321
-2. Click en "Ingresar" → login con `cliente@test.cl / cliente123`
-3. Agregar platos al carrito → "Siguiente"
-4. Elegir fecha, hora, mesa → "Siguiente"
-5. Revisar carrito → "Ir a pagar"
-6. "Ir a Webpay" → te lleva a la pasarela
-7. Usar tarjeta de prueba VISA `4051 8856 0044 6623`
-8. Volver y ver pago confirmado
+---
 
-En otra ventana, login como encargado y ver el pedido en `/encargado`.
+## 🧪 Guía de Pruebas de Flujo
 
-## 📝 Próximos pasos sugeridos
+Experimenta con todo el ciclo de vida del pedido con los siguientes pasos sencillos:
 
-- [ ] Tests con pytest (especialmente `pedidos.py` con el manejo de stock)
-- [ ] WebSockets para notificar al encargado en tiempo real (hoy hay polling cada 8s)
-- [ ] Subida de imágenes de productos (S3 o local)
-- [ ] Exportar reportes de ventas (CSV/PDF)
-- [ ] Multi-idioma (i18n)
-- [ ] PWA / instalable
+1. **Catálogo**: Entra a [http://localhost:4321](http://localhost:4321). Observa el menú dinámico agrupado por categorías de la semilla chilena tradicional (Carne, Pollo, Ensaladas, Entradas, etc.).
+2. **Selección**: Añade platos al carrito (ej. un *Lomo a lo Pobre* y una *Empanada de Pino*).
+3. **Carrito**: Haz clic en el indicador de progreso o "Siguiente" para avanzar al resumen.
+4. **Pago**: Avanza a la pantalla de pago.
+   - *Caso A (Invitado)*: Selecciona **"Pagar como Invitado"**.
+   - *Caso B (Registrado)*: Inicia sesión con `customer@test.cl` / `cliente123` y presiona **"Confirmar y Pagar"**.
+5. **Resultado**: Serás redirigido instantáneamente al recibo con estado **¡Pago Aceptado!** y tu número de pedido único.
+6. **Administración**: En paralelo, accede a la interfaz de Encargado [http://localhost:4321/encargado](http://localhost:4321/encargado). Observa cómo el pedido ingresa en tiempo real y el stock correspondiente se descuenta del inventario disponible.
 
-## 🐛 Troubleshooting
-
-**`alembic: command not found`** → asegúrate de tener el venv activado.
-
-**Frontend no se conecta al backend** → verifica que `PUBLIC_API_URL` en `frontend/.env` apunte a `http://localhost:8000`.
-
-**Webpay no carga** → en algunos navegadores Safari/Brave bloquea redirects POST cross-origin. Probar en Chrome/Firefox.
-
-**`OperationalError: could not connect to server`** → PostgreSQL no está corriendo. Si usas Docker: `docker-compose up postgres`.
+---
 
 ## 📄 Licencia
 
-MIT — uso libre para el proyecto académico.
+MIT — Proyecto académico y de uso libre para gestión y demostraciones de ERPs gastronómicos.
