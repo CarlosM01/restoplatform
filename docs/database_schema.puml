@@ -1,0 +1,346 @@
+@startuml Restoplatform_Database_Schema
+
+!theme plain
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam dpi 150
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #A0A0A0
+    ArrowColor #606060
+    BorderThickness 1.5
+}
+
+package "Core & Orders System" #F8F9FA {
+    enum Role {
+        CUSTOMER
+        MANAGER
+        ADMIN
+    }
+
+    enum OrderStatus {
+        PENDING
+        CONFIRMED
+        IN_PREPARATION
+        READY
+        DELIVERED
+        CANCELED
+    }
+
+    enum PaymentStatus {
+        PENDING
+        PAID
+        REJECTED
+        REFUNDED
+    }
+
+    entity "users" as users {
+        * id : Integer <<PK>>
+        --
+        * rut : String(12) <<unique>>
+        * email : String(120) <<unique>>
+        * password_hash : String(255)
+        * name : String(100)
+        * role : Role
+        * is_active : Boolean
+        * is_banned : Boolean
+        * created_at : DateTime
+    }
+
+    entity "products" as products {
+        * id : Integer <<PK>>
+        --
+        * name : String(100)
+        description : String(500)
+        * price : Float
+        * category : String(50)
+        image : String(255)
+        * is_active : Boolean
+        modifiers : JSON
+        rating : Float
+        tag_class : String(50)
+        tag_label : String(100)
+    }
+
+    entity "product_categories" as product_categories {
+        * id : Integer <<PK>>
+        --
+        * name : String(50) <<unique>>
+        image : String(255)
+    }
+
+    entity "product_allergens" as product_allergens {
+        * id : Integer <<PK>>
+        --
+        * product_id : Integer <<FK>>
+        * name : String(100)
+        severity : String(50)
+        icon : String(50)
+        label : String(100)
+    }
+
+    entity "product_sizes" as product_sizes {
+        * id : Integer <<PK>>
+        --
+        * product_id : Integer <<FK>>
+        * name : String(50)
+        * price_delta : Float
+    }
+
+    entity "product_extras" as product_extras {
+        * id : Integer <<PK>>
+        --
+        * product_id : Integer <<FK>>
+        * name : String(100)
+        * price : Float
+    }
+
+    entity "inventories" as inventories {
+        * id : Integer <<PK>>
+        --
+        * product_id : Integer <<FK, unique>>
+        * stock : Integer
+        * minimum_stock : Integer
+    }
+
+    entity "tables" as tables {
+        * id : Integer <<PK>>
+        --
+        * number : Integer
+        * capacity : Integer
+        * is_active : Boolean
+    }
+
+    entity "orders" as orders {
+        * id : Integer <<PK>>
+        --
+        customer_id : Integer <<FK>>
+        * total : Float
+        * status : OrderStatus
+        * created_at : DateTime
+    }
+
+    entity "order_items" as order_items {
+        * id : Integer <<PK>>
+        --
+        * order_id : Integer <<FK>>
+        * product_id : Integer <<FK>>
+        * quantity : Integer
+        * unit_price : Float
+        modifiers : JSON
+    }
+
+    entity "payments" as payments {
+        * id : Integer <<PK>>
+        --
+        * order_id : Integer <<FK, unique>>
+        * amount : Float
+        * status : PaymentStatus
+        transbank_token : String(255)
+        transbank_buy_order : String(50)
+        * created_at : DateTime
+    }
+}
+
+package "Advanced Menu & Ingredient System" #FFFDF3 {
+    entity "categories" as categories {
+        * id : UUID <<PK>>
+        --
+        parent_id : UUID <<FK>>
+        * name : String(200)
+        subtitle : String(200)
+        description : Text
+        image_url : String(500)
+        * sort_order : Integer
+        * is_active : Boolean
+    }
+
+    entity "menu_items" as menu_items {
+        * id : UUID <<PK>>
+        --
+        * category_id : UUID <<FK>>
+        * name : String(200)
+        description : Text
+        * base_price : Numeric(10, 2)
+        image_url : String(500)
+        * is_available : Boolean
+        * is_featured : Boolean
+        * sort_order : Integer
+        prep_time_minutes : Integer
+        badge : String(100)
+    }
+
+    entity "menu_item_variants" as menu_item_variants {
+        * id : UUID <<PK>>
+        --
+        * menu_item_id : UUID <<FK>>
+        * name : String(200)
+        sku : String(100)
+        price_override : Numeric(10, 2)
+        * is_available : Boolean
+        * sort_order : Integer
+    }
+
+    entity "modifier_groups" as modifier_groups {
+        * id : UUID <<PK>>
+        --
+        * name : String(200)
+        description : Text
+        * sort_order : Integer
+    }
+
+    entity "modifiers" as modifiers {
+        * id : UUID <<PK>>
+        --
+        * modifier_group_id : UUID <<FK>>
+        * name : String(200)
+        * price_delta : Numeric(10, 2)
+        max_quantity : Integer
+        * is_available : Boolean
+        * sort_order : Integer
+    }
+
+    entity "suppliers" as suppliers {
+        * id : UUID <<PK>>
+        --
+        * name : String(200)
+        contact_email : String(200)
+        country : String(100)
+        * is_active : Boolean
+    }
+
+    entity "ingredients" as ingredients {
+        * id : UUID <<PK>>
+        --
+        supplier_id : UUID <<FK>>
+        * name : String(200)
+        description : Text
+        image_url : String(500)
+        origin_country : String(100)
+        unit : String(50)
+        storage_instructions : Text
+        * is_active : Boolean
+    }
+
+    entity "dietary_tags" as dietary_tags {
+        * id : UUID <<PK>>
+        --
+        * name : String(100)
+        description : Text
+        icon_url : String(500)
+        badge_color : String(50)
+        internal_ref_url : String(500)
+    }
+
+    entity "allergens" as allergens {
+        * id : UUID <<PK>>
+        --
+        * name : String(100)
+        description : Text
+        icon_url : String(500)
+        severity : String(50)
+        internal_ref_url : String(500)
+    }
+
+    ' Junction / Association Tables
+    entity "menu_item_modifier_groups" as menu_item_modifier_groups {
+        * menu_item_id : UUID <<PK, FK>>
+        * modifier_group_id : UUID <<PK, FK>>
+        --
+        * min_selection : Integer
+        max_selection : Integer
+        * sort_order : Integer
+    }
+
+    entity "menu_item_dietary_tags" as menu_item_dietary_tags {
+        * menu_item_id : UUID <<PK, FK>>
+        * dietary_tag_id : UUID <<PK, FK>>
+        --
+        * is_auto_applied : Boolean
+        calculated_from_ingredient_ids : JSON
+    }
+
+    entity "variant_modifier_groups" as variant_modifier_groups {
+        * variant_id : UUID <<PK, FK>>
+        * modifier_group_id : UUID <<PK, FK>>
+        --
+        * min_selection : Integer
+        max_selection : Integer
+    }
+
+    entity "variant_ingredients" as variant_ingredients {
+        * variant_id : UUID <<PK, FK>>
+        * ingredient_id : UUID <<PK, FK>>
+        --
+        quantity : String(100)
+        * is_main : Boolean
+    }
+
+    entity "menu_item_ingredients" as menu_item_ingredients {
+        * menu_item_id : UUID <<PK, FK>>
+        * ingredient_id : UUID <<PK, FK>>
+        --
+        quantity : String(100)
+        * is_main : Boolean
+    }
+
+    entity "modifier_ingredients" as modifier_ingredients {
+        * modifier_id : UUID <<PK, FK>>
+        * ingredient_id : UUID <<PK, FK>>
+        --
+        quantity : String(100)
+    }
+
+    entity "ingredient_allergens" as ingredient_allergens {
+        * ingredient_id : UUID <<PK, FK>>
+        * allergen_id : UUID <<PK, FK>>
+        --
+    }
+}
+
+' --- Core System Relationships ---
+users ||--o{ orders : "places"
+orders ||--|| payments : "has"
+orders ||--|{ order_items : "contains"
+products ||--o{ order_items : "ordered as"
+products ||--|| inventories : "tracks"
+products ||--o{ product_allergens : "contains"
+products ||--o{ product_sizes : "offers"
+products ||--o{ product_extras : "adds"
+
+' --- Advanced Menu & Ingredient System Relationships ---
+categories |o--o{ categories : "parent / subcategories"
+categories ||--o{ menu_items : "categorizes"
+menu_items ||--|{ menu_item_variants : "has"
+
+' Menu Item Junctions
+menu_items ||--o{ menu_item_modifier_groups
+modifier_groups ||--o{ menu_item_modifier_groups
+
+menu_items ||--o{ menu_item_dietary_tags
+dietary_tags ||--o{ menu_item_dietary_tags
+
+menu_items ||--o{ menu_item_ingredients
+ingredients ||--o{ menu_item_ingredients
+
+' Variant Junctions
+menu_item_variants ||--o{ variant_modifier_groups
+modifier_groups ||--o{ variant_modifier_groups
+
+menu_item_variants ||--o{ variant_ingredients
+ingredients ||--o{ variant_ingredients
+
+' Modifier & Supplier Junctions
+modifier_groups ||--|{ modifiers : "defines"
+modifiers ||--o{ modifier_ingredients
+ingredients ||--o{ modifier_ingredients
+
+suppliers ||--o{ ingredients : "supplies"
+
+' Ingredient Allergen Junctions
+ingredients ||--o{ ingredient_allergens
+allergens ||--o{ ingredient_allergens
+
+@enduml

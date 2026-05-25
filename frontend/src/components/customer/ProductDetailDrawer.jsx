@@ -80,6 +80,31 @@ export default function ProductDetailDrawer({ product, onClose, onAdd, fmt }) {
             <p className="drawer-product-desc">{product.description || 'Sin descripción disponible.'}</p>
             <div className="drawer-product-base-price">Precio base: {fmt(product.price)}</div>
 
+            {/* ─── INGREDIENTS SECTION ─── */}
+            {product.ingredients && product.ingredients.length > 0 && (
+              <div className="drawer-section">
+                <h3 className="drawer-section-title">Ingredientes</h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                  {product.ingredients.map((ing, idx) => (
+                    <span 
+                      key={idx} 
+                      style={{ 
+                        background: '#FAF9F6', 
+                        border: '1px solid var(--color-border)', 
+                        padding: '4px 12px', 
+                        borderRadius: '20px', 
+                        fontSize: '12px', 
+                        color: 'var(--color-dark)',
+                        fontWeight: '600'
+                      }}
+                    >
+                      {ing}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* ─── ALLERGENS SECTION ─── */}
             {product.allergens && product.allergens.length > 0 && (
               <div className="drawer-section">

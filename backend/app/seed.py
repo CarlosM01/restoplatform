@@ -134,6 +134,17 @@ def seed():
             }
 
             for name, desc, price, cat, img, stock, rating, tag_class, tag_label in productos_data:
+                product_ingredients = {
+                    "Lomo a lo Pobre": ["Lomo Vetado", "Papas", "Cebolla", "Huevo"],
+                    "Pollo Arvejado": ["Pechuga de Pollo", "Arvejas", "Zanahoria", "Arroz"],
+                    "Cazuela de Vacuno": ["Carne de Vacuno", "Zapallo", "Choclo", "Papa"],
+                    "Ensalada César": ["Lechuga Costina", "Crutones", "Queso Parmesano", "Aderezo César"],
+                    "Pastel de Choclo": ["Choclo", "Pino de Carne", "Pollo", "Huevo Duro"],
+                    "Empanadas de Pino": ["Pino de Carne", "Masa de Harina", "Huevo Duro", "Aceituna"],
+                    "Congrio Frito": ["Congrio Dorado", "Batido Frito", "Papas", "Mayonesa"],
+                    "Humitas": ["Choclo Molido", "Albahaca", "Cebolla", "Ensalada Chilena"]
+                }.get(name, [])
+
                 p = Product(
                     name=name,
                     description=desc,
@@ -143,6 +154,7 @@ def seed():
                     rating=rating,
                     tag_class=tag_class,
                     tag_label=tag_label,
+                    ingredients=product_ingredients,
                 )
                 db.add(p)
                 db.flush()

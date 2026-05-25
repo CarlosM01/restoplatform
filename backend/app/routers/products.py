@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select
 from app.core.database import get_db
 from app.deps import require_encargado, require_admin
-from app.models import Product, ProductCategory, Inventory, User, Role
+from app.models import Product, ProductCategory, Inventory, User, Role, ProductAllergen, ProductSize, ProductExtra
 from app.schemas import ProductOut, ProductCreate, ProductUpdate, StockUpdate, ProductCategoryOut
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -55,10 +55,42 @@ def crear(
         rating=data.rating,
         tag_class=data.tag_class,
         tag_label=data.tag_label,
+        ingredients=data.ingredients or [],
     )
     db.add(p)
     db.flush()
-    db.add(Inventory(product_id=p.id, stock=data.stock_inicial))
+    
+    db.add(Inventory(product_id=p.id, stock=data.stock_inicial, minimum_stock=data.minimum_stock))
+
+    # Add size variants if specified
+    if data.sizes:
+        for s in data.sizes:
+            db.add(ProductSize(
+                product_id=p.id,
+                name=s.get("name"),
+                price_delta=float(s.get("price_delta", 0.0))
+            ))
+
+    # Add extras if specified
+    if data.extras:
+        for e in data.extras:
+            db.add(ProductExtra(
+                product_id=p.id,
+                name=e.get("name"),
+                price=float(e.get("price", 0.0))
+            ))
+
+    # Add allergens if specified
+    if data.allergens:
+        for a in data.allergens:
+            db.add(ProductAllergen(
+                product_id=p.id,
+                name=a.get("name"),
+                severity=a.get("severity"),
+                icon=a.get("icon", "⚠️"),
+                label=a.get("label", a.get("name", "").upper())
+            ))
+
     db.commit()
     db.refresh(p)
     return p
@@ -75,8 +107,53 @@ def actualizar(
     if not p:
         raise HTTPException(404)
 
+    relational_fields = {"sizes", "extras", "allergens", "minimum_stock"}
+
+    # Update inventory minimum stock if it is passed
+    if data.minimum_stock is not None:
+        if not p.inventory:
+            p.inventory = Inventory(product_id=p.id, stock=0)
+        p.inventory.minimum_stock = data.minimum_stock
+
     for field, value in data.model_dump(exclude_unset=True).items():
-        setattr(p, field, value)
+        if field not in relational_fields:
+            setattr(p, field, value)
+
+    # Sync size variants
+    if data.sizes is not None:
+        # Clear existing ones
+        db.query(ProductSize).filter(ProductSize.product_id == p.id).delete()
+        for s in data.sizes:
+            db.add(ProductSize(
+                product_id=p.id,
+                name=s.get("name"),
+                price_delta=float(s.get("price_delta", 0.0))
+            ))
+
+    # Sync extras
+    if data.extras is not None:
+        # Clear existing ones
+        db.query(ProductExtra).filter(ProductExtra.product_id == p.id).delete()
+        for e in data.extras:
+            db.add(ProductExtra(
+                product_id=p.id,
+                name=e.get("name"),
+                price=float(e.get("price", 0.0))
+            ))
+
+    # Sync allergens
+    if data.allergens is not None:
+        # Clear existing ones
+        db.query(ProductAllergen).filter(ProductAllergen.product_id == p.id).delete()
+        for a in data.allergens:
+            db.add(ProductAllergen(
+                product_id=p.id,
+                name=a.get("name"),
+                severity=a.get("severity"),
+                icon=a.get("icon", "⚠️"),
+                label=a.get("label", a.get("name", "").upper())
+            ))
+
     db.commit()
     db.refresh(p)
     return p

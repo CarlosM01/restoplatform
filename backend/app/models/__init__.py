@@ -53,6 +53,7 @@ class Product(Base):
     rating: Mapped[float | None] = mapped_column(Float, nullable=True, default=4.5)
     tag_class: Mapped[str | None] = mapped_column(String(50), nullable=True)
     tag_label: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    ingredients: Mapped[list[str] | None] = mapped_column(JSON, nullable=True, default=list)
 
     inventory: Mapped["Inventory | None"] = relationship(back_populates="product", uselist=False, cascade="all, delete-orphan")
     allergens: Mapped[list["ProductAllergen"]] = relationship(back_populates="product", cascade="all, delete-orphan")

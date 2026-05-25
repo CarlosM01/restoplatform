@@ -69,10 +69,15 @@ class ProductBase(BaseModel):
     rating: float | None = 4.5
     tag_class: str | None = None
     tag_label: str | None = None
+    ingredients: list[str] | None = None
 
 
 class ProductCreate(ProductBase):
     stock_inicial: int = 0
+    minimum_stock: int = 5
+    allergens: list[dict] | None = None
+    sizes: list[dict] | None = None
+    extras: list[dict] | None = None
 
 
 class ProductUpdate(BaseModel):
@@ -86,6 +91,11 @@ class ProductUpdate(BaseModel):
     rating: float | None = None
     tag_class: str | None = None
     tag_label: str | None = None
+    ingredients: list[str] | None = None
+    minimum_stock: int | None = None
+    allergens: list[dict] | None = None
+    sizes: list[dict] | None = None
+    extras: list[dict] | None = None
 
 
 class ProductAllergenOut(BaseModel):
