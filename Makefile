@@ -1,7 +1,7 @@
 # RestoPlatform Project Makefile
 # Standardizes common development tasks for frontend, backend, and database.
 
-.PHONY: help up down restart status logs logs-backend build clean backend-shell db-shell db-migrate db-seed frontend-install frontend-dev frontend-up
+.PHONY: help up down restart status logs logs-backend logs-frontend build clean backend-shell frontend-shell db-shell db-migrate db-seed frontend-install frontend-dev frontend-up
 
 # Dynamic Docker Compose CLI detection
 DOCKER_COMBO := $(shell docker compose version >/dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
@@ -19,6 +19,7 @@ help:
 	@echo "  make status                 Show status of all running containers"
 	@echo "  make logs                   Follow logs from all containers"
 	@echo "  make logs-backend           Follow logs from the backend API container"
+	@echo "  make logs-frontend          Follow logs from the frontend Nginx container"
 	@echo "  make build                  Build or rebuild services"
 	@echo "  make clean                  Stop containers and remove volumes (wipes database)"
 	@echo ""
@@ -29,6 +30,7 @@ help:
 	@echo ""
 	@echo "Shell Access:"
 	@echo "  make backend-shell          Get sh shell inside the backend container"
+	@echo "  make frontend-shell         Get sh shell inside the frontend container"
 	@echo ""
 	@echo "Frontend Commands (Local host):"
 	@echo "  make frontend-install       Install frontend dependencies"
@@ -59,6 +61,9 @@ logs:
 logs-backend:
 	$(DOCKER_COMBO) logs -f backend
 
+logs-frontend:
+	$(DOCKER_COMBO) logs -f frontend
+
 build:
 	@echo "Building containers..."
 	$(DOCKER_COMBO) build
@@ -82,6 +87,9 @@ db-shell:
 
 backend-shell:
 	$(DOCKER_COMBO) exec backend sh
+
+frontend-shell:
+	$(DOCKER_COMBO) exec frontend sh
 
 # --- Frontend (Local) ---
 
