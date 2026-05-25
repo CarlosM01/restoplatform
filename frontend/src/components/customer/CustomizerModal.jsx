@@ -2,6 +2,8 @@ import React from 'react';
 import Modal from '../common/Modal.jsx';
 import Button from '../common/Button.jsx';
 
+const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
+
 export default function CustomizerModal({ customizingItem, selectedOptions, toggleOption, customTotal, handleAddCustomized, onClose, fmt }) {
   if (!customizingItem) return null;
 
@@ -16,7 +18,13 @@ export default function CustomizerModal({ customizingItem, selectedOptions, togg
     >
       {/* Modal Header */}
       <div className="customizer-header-row">
-        <div className="customizer-image">{customizingItem.image || '🍽️'}</div>
+        <div className="customizer-image">
+          {isUrl(customizingItem.image) ? (
+            <img src={customizingItem.image} alt={customizingItem.name} />
+          ) : (
+            customizingItem.image || '🍽️'
+          )}
+        </div>
         <div>
           <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 18, fontWeight: 700, margin: '0 0 2px 0' }}>
             {customizingItem.name}

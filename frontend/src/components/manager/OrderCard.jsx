@@ -2,6 +2,8 @@ import React from 'react';
 import Card from '../common/Card.jsx';
 import Button from '../common/Button.jsx';
 
+const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
+
 const ESTADO_LABEL = {
   pendiente: { label: 'Pendiente', color: '#F57C00', bg: '#FFF3E0' },
   confirmado: { label: 'Confirmado', color: '#1976D2', bg: '#E3F2FD' },
@@ -34,7 +36,14 @@ export default function OrderCard({ p, products, cambiarEstado, fmt }) {
           const prod = products.find(pr => pr.id === it.product_id);
           return (
             <div key={it.id} className="order-card-item-row">
-              <span>{prod?.image} {prod?.name || `Producto #${it.product_id}`} × {it.quantity}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {isUrl(prod?.image) ? (
+                  <img src={prod.image} alt={prod.name} style={{ width: 20, height: 20, borderRadius: 4, objectFit: 'cover', display: 'inline-block', verticalAlign: 'middle' }} />
+                ) : (
+                  <span>{prod?.image || '🍽️'}</span>
+                )}
+                <span>{prod?.name || `Producto #${it.product_id}`} × {it.quantity}</span>
+              </span>
               <span style={{ fontWeight: 600 }}>{fmt(it.unit_price * it.quantity)}</span>
             </div>
           );

@@ -1,5 +1,7 @@
 import React from 'react';
 
+const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
+
 export default function CartStep({ cart, upd, total, fmt }) {
   return (
     <div className="cart-container">
@@ -10,7 +12,14 @@ export default function CartStep({ cart, upd, total, fmt }) {
       {cart.map(c => (
         <div key={c.cartItemId} className="cart-item-row">
           <div className="cart-item-details">
-            <div className="cart-item-name">{c.image} {c.name}</div>
+            <div className="cart-item-name" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {isUrl(c.image) ? (
+                <img src={c.image} alt={c.name} style={{ width: 24, height: 24, borderRadius: 6, objectFit: 'cover' }} />
+              ) : (
+                <span>{c.image || '🍽️'}</span>
+              )}
+              <span>{c.name}</span>
+            </div>
             {c.selectedModifiers && c.selectedModifiers.length > 0 && (
               <div className="cart-item-mods">
                 {c.selectedModifiers.map((m, idx) => (

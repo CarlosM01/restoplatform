@@ -2,6 +2,8 @@ import React from 'react';
 import Card from '../common/Card.jsx';
 import Button from '../common/Button.jsx';
 
+const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
+
 export default function InventoryTab({ products, editStock, setEditStock, guardarStock, updateProductStatus, fmt }) {
   const B = 'var(--color-border)';
   const G = 'var(--color-gold)';
@@ -37,7 +39,13 @@ export default function InventoryTab({ products, editStock, setEditStock, guarda
                   <tr key={p.id} style={{ borderTop: `1px solid ${B}` }}>
                     <td>
                       <div className="inventory-product-cell">
-                        <span className="inventory-product-emoji">{p.image}</span>
+                        <span className="inventory-product-emoji" style={{ display: 'inline-flex', width: 36, height: 36, borderRadius: 8, background: '#F5F5F5', overflow: 'hidden', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          {isUrl(p.image) ? (
+                            <img src={p.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            p.image || '🍽️'
+                          )}
+                        </span>
                         <div>
                           <div className="inventory-product-name">{p.name}</div>
                           <div className="inventory-product-desc">{p.description}</div>

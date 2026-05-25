@@ -1,6 +1,5 @@
 export const SECTIONS = [
   { id: 'users', label: 'Usuarios', category: 'GENERAL' },
-  { id: 'products', label: 'Productos (Venta)', category: 'MENÚ' },
   { id: 'categories', label: 'Categorías', category: 'MENÚ' },
   { id: 'items', label: 'Platos / Ítems', category: 'MENÚ' },
   { id: 'variants', label: 'Variantes', category: 'MENÚ' },
@@ -13,15 +12,6 @@ export const SECTIONS = [
 ];
 
 export const FIELD_CONFIGS = {
-  products: [
-    { name: 'name', label: 'Nombre', type: 'text', required: true },
-    { name: 'category', label: 'Categoría (ej: Carne, Entrada, Postre)', type: 'text', required: true },
-    { name: 'description', label: 'Descripción', type: 'textarea' },
-    { name: 'price', label: 'Precio ($)', type: 'number', required: true, min: 1 },
-    { name: 'image', label: 'Emoji / Icono', type: 'text', default: '🍽️' },
-    { name: 'stock_inicial', label: 'Stock Inicial', type: 'number', default: 0, hideOnEdit: true },
-    { name: 'is_active', label: 'Activo', type: 'checkbox', default: true },
-  ],
   categories: [
     { name: 'name', label: 'Nombre', type: 'text', required: true },
     { name: 'parent_id', label: 'Categoría Padre', type: 'select', relation: 'categories', nullable: true },
@@ -33,15 +23,12 @@ export const FIELD_CONFIGS = {
   ],
   items: [
     { name: 'name', label: 'Nombre', type: 'text', required: true },
-    { name: 'category_id', label: 'Categoría', type: 'select', relation: 'categories', required: true },
+    { name: 'category', label: 'Categoría', type: 'select', relation: 'categories', required: true },
     { name: 'description', label: 'Descripción', type: 'textarea' },
-    { name: 'base_price', label: 'Precio Base ($)', type: 'number', required: true, min: 0 },
-    { name: 'image_url', label: 'URL de Imagen', type: 'text' },
-    { name: 'prep_time_minutes', label: 'Tiempo Prep. (minutos)', type: 'number' },
-    { name: 'badge', label: 'Insignia (ej: Nuevo, Vegano)', type: 'text' },
-    { name: 'sort_order', label: 'Orden de Clasificación', type: 'number', default: 0 },
-    { name: 'is_available', label: 'Disponible', type: 'checkbox', default: true },
-    { name: 'is_featured', label: 'Destacado', type: 'checkbox', default: false },
+    { name: 'price', label: 'Precio ($)', type: 'number', required: true, min: 1 },
+    { name: 'image', label: 'URL de Imagen', type: 'text', default: 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600&auto=format&fit=crop&q=60' },
+    { name: 'stock_inicial', label: 'Stock Inicial', type: 'number', default: 0, hideOnEdit: true },
+    { name: 'is_active', label: 'Activo', type: 'checkbox', default: true },
   ],
   variants: [
     { name: 'name', label: 'Nombre de Variante (ej: Personal, Familiar)', type: 'text', required: true },

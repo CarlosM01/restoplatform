@@ -13,14 +13,13 @@ const apis = {
     update: adminUpdateUser,
     remove: adminDeleteUser,
   },
-  products: {
+  categories: menuCrud('categories'),
+  items: {
     list: getProducts,
     create: createProduct,
     update: updateProduct,
     remove: deleteProduct,
   },
-  categories: menuCrud('categories'),
-  items: menuCrud('items'),
   variants: menuCrud('variants'),
   'modifier-groups': menuCrud('modifier-groups'),
   modifiers: menuCrud('modifiers'),
@@ -36,7 +35,6 @@ export default function useAdminDashboard() {
 
   const [data, setData] = useState({
     users: [],
-    products: [],
     categories: [],
     items: [],
     variants: [],
@@ -70,10 +68,9 @@ export default function useAdminDashboard() {
     setLoading(true);
     try {
       const [
-        users, products, categories, items, variants, modifierGroups, modifiers, suppliers, ingredients, dietaryTags, allergens
+        users, categories, items, variants, modifierGroups, modifiers, suppliers, ingredients, dietaryTags, allergens
       ] = await Promise.all([
         apis.users.list(),
-        apis.products.list(),
         apis.categories.list(),
         apis.items.list(),
         apis.variants.list(),
@@ -87,7 +84,6 @@ export default function useAdminDashboard() {
 
       setData({
         users: users || [],
-        products: products || [],
         categories: categories || [],
         items: items || [],
         variants: variants || [],

@@ -1,5 +1,7 @@
 import React from 'react';
 
+const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
+
 const ROLE_COLOR = {
   admin: { bg: '#FFEBEE', color: '#C62828' },
   manager: { bg: '#E3F2FD', color: '#1976D2' },
@@ -38,18 +40,6 @@ export default function AdminTable({
             </tr>
           )}
 
-          {activeTab === 'products' && (
-            <tr>
-              <th>IMG</th>
-              <th>NOMBRE</th>
-              <th>CATEGORÍA</th>
-              <th style={{ textAlign: 'right' }}>PRECIO</th>
-              <th style={{ textAlign: 'center' }}>STOCK</th>
-              <th style={{ textAlign: 'center' }}>ESTADO</th>
-              <th style={{ textAlign: 'center' }}>ACCIONES</th>
-            </tr>
-          )}
-
           {activeTab === 'categories' && (
             <tr>
               <th>IMG</th>
@@ -67,10 +57,9 @@ export default function AdminTable({
               <th>IMG</th>
               <th>NOMBRE</th>
               <th>CATEGORÍA</th>
-              <th style={{ textAlign: 'right' }}>PRECIO BASE</th>
-              <th style={{ textAlign: 'center' }}>PREP. (MIN)</th>
-              <th style={{ textAlign: 'center' }}>DESTACADO</th>
-              <th style={{ textAlign: 'center' }}>DISP.</th>
+              <th style={{ textAlign: 'right' }}>PRECIO</th>
+              <th style={{ textAlign: 'center' }}>STOCK</th>
+              <th style={{ textAlign: 'center' }}>ESTADO</th>
               <th style={{ textAlign: 'center' }}>ACCIONES</th>
             </tr>
           )}
@@ -194,34 +183,13 @@ export default function AdminTable({
                   </>
                 )}
 
-                {activeTab === 'products' && (
-                  <>
-                    <td>
-                      <div style={{ width: 32, height: 32, borderRadius: 6, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
-                        {item.image || '🍽️'}
-                      </div>
-                    </td>
-                    <td style={{ fontWeight: 600 }}>{item.name}</td>
-                    <td>{item.category}</td>
-                    <td style={{ textAlign: 'right', fontWeight: 600 }}>{fmt(item.price)}</td>
-                    <td style={{ textAlign: 'center' }}>{item.inventory?.stock ?? 0}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <span style={{ background: item.is_active ? '#E8F5E9' : '#FFEBEE', color: item.is_active ? '#2E7D32' : '#C62828', padding: '3px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600 }}>
-                        {item.is_active ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <button onClick={() => setEditTarget(item)} className="admin-action-btn edit">Editar</button>
-                      <button onClick={() => removeEntity('products', item.id)} className="admin-action-btn delete">Eliminar</button>
-                    </td>
-                  </>
-                )}
-
                 {activeTab === 'categories' && (
                   <>
                     <td>
-                      {item.image_url ? (
+                      {isUrl(item.image_url) ? (
                         <img src={item.image_url} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', border: `1px solid ${B}` }} />
+                      ) : item.image_url ? (
+                        <div style={{ width: 28, height: 28, borderRadius: 6, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>{item.image_url}</div>
                       ) : (
                         <div style={{ width: 28, height: 28, borderRadius: 6, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: M }}>📁</div>
                       )}
@@ -245,25 +213,21 @@ export default function AdminTable({
                 {activeTab === 'items' && (
                   <>
                     <td>
-                      {item.image_url ? (
-                        <img src={item.image_url} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: 'cover', border: `1px solid ${B}` }} />
-                      ) : (
-                        <div style={{ width: 32, height: 32, borderRadius: 6, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: M }}>🍽️</div>
-                      )}
+                      <div style={{ width: 32, height: 32, borderRadius: 6, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, overflow: 'hidden' }}>
+                        {isUrl(item.image) ? (
+                          <img src={item.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          item.image || '🍽️'
+                        )}
+                      </div>
                     </td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{item.name}</div>
-                      {item.badge && <span style={{ background: '#FFF3E0', color: '#E65100', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, display: 'inline-block', marginTop: 3 }}>{item.badge}</span>}
-                    </td>
-                    <td>{getNameLookup('categories', item.category_id)}</td>
-                    <td style={{ textAlign: 'right', fontWeight: 600 }}>{fmt(item.base_price)}</td>
-                    <td style={{ textAlign: 'center' }}>{item.prep_time_minutes ? `${item.prep_time_minutes} min` : '—'}</td>
+                    <td style={{ fontWeight: 600 }}>{item.name}</td>
+                    <td>{item.category}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 600 }}>{fmt(item.price)}</td>
+                    <td style={{ textAlign: 'center' }}>{item.inventory?.stock ?? 0}</td>
                     <td style={{ textAlign: 'center' }}>
-                      <span style={{ color: item.is_featured ? '#FFB300' : M, fontSize: 16 }}>{item.is_featured ? '★' : '☆'}</span>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <span style={{ background: item.is_available ? '#E8F5E9' : '#FFEBEE', color: item.is_available ? '#2E7D32' : '#C62828', padding: '3px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600 }}>
-                        {item.is_available ? 'Sí' : 'No'}
+                      <span style={{ background: item.is_active ? '#E8F5E9' : '#FFEBEE', color: item.is_active ? '#2E7D32' : '#C62828', padding: '3px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600 }}>
+                        {item.is_active ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td style={{ textAlign: 'center' }}>
@@ -341,8 +305,10 @@ export default function AdminTable({
                 {activeTab === 'ingredients' && (
                   <>
                     <td>
-                      {item.image_url ? (
+                      {isUrl(item.image_url) ? (
                         <img src={item.image_url} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', border: `1px solid ${B}` }} />
+                      ) : item.image_url ? (
+                        <div style={{ width: 28, height: 28, borderRadius: 6, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>{item.image_url}</div>
                       ) : (
                         <div style={{ width: 28, height: 28, borderRadius: 6, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: M }}>📦</div>
                       )}

@@ -16,6 +16,7 @@ export default function CustomerMenu() {
     user,
     step,
     setStep,
+    products,
     cats,
     cat,
     setCat,
@@ -106,6 +107,7 @@ export default function CustomerMenu() {
             cat={cat}
             setCat={setCat}
             items={items}
+            products={products}
             cart={cart}
             flash={flash}
             add={add}

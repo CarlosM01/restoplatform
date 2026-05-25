@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import useAdminDashboard from '../../hooks/useAdminDashboard.js';
 import Header from '../common/Header.jsx';
 import Button from '../common/Button.jsx';
@@ -36,6 +36,31 @@ export default function AdminDashboard() {
     apis,
   } = useAdminDashboard();
 
+  // State for collapsible categories in navigation
+  const [expandedCats, setExpandedCats] = useState({
+    'GENERAL': true,
+    'MENÚ': true,
+    'LOGÍSTICA / SALUD': true
+  });
+
+  // Automatically expand category of the active tab when tab changes
+  useEffect(() => {
+    const activeSection = SECTIONS.find(s => s.id === activeTab);
+    if (activeSection) {
+      setExpandedCats(prev => ({
+        ...prev,
+        [activeSection.category]: true
+      }));
+    }
+  }, [activeTab]);
+
+  const toggleCategory = (cat) => {
+    setExpandedCats(prev => ({
+      ...prev,
+      [cat]: !prev[cat]
+    }));
+  };
+
   if (!user) return null;
 
   // Group sections by category
@@ -53,24 +78,38 @@ export default function AdminDashboard() {
         <div className="admin-nav">
           {categories.map(cat => {
             const catSections = SECTIONS.filter(s => s.category === cat);
+            const isExpanded = !!expandedCats[cat];
             return (
-              <div key={cat} style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--color-muted)', letterSpacing: '0.8px', padding: '0 12px 6px', textTransform: 'uppercase' }}>
-                  {cat}
+              <div key={cat} className="admin-nav-group">
+                <button
+                  type="button"
+                  onClick={() => toggleCategory(cat)}
+                  className={`admin-category-header ${isExpanded ? 'expanded' : ''}`}
+                >
+                  <span className="category-title">{cat}</span>
+                  <span className="category-chevron">
+                    <svg width="6" height="10" viewBox="0 0 6 10" fill="none">
+                      <path d="M1 1L5 5L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                </button>
+                <div className={`admin-submenu-wrapper ${isExpanded ? 'expanded' : ''}`}>
+                  <div className="admin-submenu-inner">
+                    {catSections.map(sec => (
+                      <button
+                        key={sec.id}
+                        onClick={() => {
+                          setActiveTab(sec.id);
+                          setSearchQuery('');
+                          setRoleFilter('');
+                        }}
+                        className={`admin-nav-item ${activeTab === sec.id ? 'active' : ''}`}
+                      >
+                        {sec.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                {catSections.map(sec => (
-                  <button
-                    key={sec.id}
-                    onClick={() => {
-                      setActiveTab(sec.id);
-                      setSearchQuery('');
-                      setRoleFilter('');
-                    }}
-                    className={`admin-nav-item ${activeTab === sec.id ? 'active' : ''}`}
-                  >
-                    {sec.label}
-                  </button>
-                ))}
               </div>
             );
           })}

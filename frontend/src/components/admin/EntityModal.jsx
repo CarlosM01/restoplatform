@@ -31,7 +31,7 @@ export default function EntityModal({ entityName, editEntity, lookupLists, apis,
           : (field.type === 'checkbox' ? false : '');
       }
     });
-    if (entityName === 'products') {
+    if (entityName === 'items') {
       init.modifiers = editEntity?.modifiers || [];
     }
     return init;
@@ -44,6 +44,13 @@ export default function EntityModal({ entityName, editEntity, lookupLists, apis,
     if (e && e.preventDefault) e.preventDefault();
     setSaving(true);
     setErr(null);
+
+    // Custom validation for items category
+    if (entityName === 'items' && !form.category) {
+      setErr('La categoría es obligatoria.');
+      setSaving(false);
+      return;
+    }
 
     // Cast data cleanly to match Pydantic schemas
     const parsed = {};
@@ -64,7 +71,7 @@ export default function EntityModal({ entityName, editEntity, lookupLists, apis,
       }
     });
 
-    if (entityName === 'products') {
+    if (entityName === 'items') {
       parsed.modifiers = form.modifiers || [];
     }
 
@@ -119,6 +126,109 @@ export default function EntityModal({ entityName, editEntity, lookupLists, apis,
             }
 
             if (field.type === 'select') {
+              if (entityName === 'items' && field.name === 'category') {
+                return (
+                  <div key={field.name} className="admin-category-selector" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label className="label" style={{ fontWeight: '700', fontSize: 13, color: D, marginBottom: 2 }}>
+                      {field.label} {field.required && <span style={{ color: '#C62828' }}>*</span>}
+                    </label>
+
+                    {form.category ? (
+                      <div style={{ background: '#FAF9F6', border: `1px solid ${B}`, borderRadius: 10, padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: 10, color: M, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600' }}>Categoría Seleccionada</span>
+                          <span style={{ fontSize: 13, fontWeight: '700', color: D, marginTop: 2 }}>{form.category}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, category: '' })}
+                          style={{ background: 'none', border: 'none', color: '#C62828', cursor: 'pointer', fontSize: 14, fontWeight: '700', padding: '4px 8px' }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: '#FFFDF9', border: `1px dashed ${G}`, borderRadius: 10, padding: 12 }}>
+                        <div style={{ flex: 1 }}>
+                          <select
+                            id="select-existing-category"
+                            className="input"
+                            style={{ padding: '6px 10px', fontSize: 12, marginBottom: 4, width: '100%', borderRadius: 8 }}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const customInput = document.getElementById('new-category-custom-name');
+                              if (val === 'CUSTOM') {
+                                customInput.style.display = 'block';
+                              } else {
+                                customInput.style.display = 'none';
+                                customInput.value = '';
+                              }
+                            }}
+                          >
+                            <option value="">Selecciona categoría existente...</option>
+                            {(lookupLists['categories'] || []).map(cat => (
+                              <option key={cat.id} value={cat.name}>{cat.name}</option>
+                            ))}
+                            <option value="CUSTOM">+ Crear nueva categoría...</option>
+                          </select>
+                          <input
+                            type="text"
+                            id="new-category-custom-name"
+                            placeholder="Nombre de nueva categoría (ej: Pizzas, Postres)"
+                            className="input"
+                            style={{ display: 'none', padding: '6px 10px', fontSize: 12, width: '100%', marginTop: 6, borderRadius: 8 }}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const selectEl = document.getElementById('select-existing-category');
+                            const customInput = document.getElementById('new-category-custom-name');
+                            let catName = '';
+                            if (selectEl.value === 'CUSTOM') {
+                              catName = customInput.value.trim();
+                            } else {
+                              catName = selectEl.value;
+                            }
+
+                            if (!catName) return;
+
+                            if (selectEl.value === 'CUSTOM') {
+                              try {
+                                setSaving(true);
+                                const newCat = await apis.categories.create({ name: catName });
+                                if (newCat) {
+                                  lookupLists['categories'] = lookupLists['categories'] || [];
+                                  lookupLists['categories'].push(newCat);
+                                }
+                              } catch (e) {
+                                alert('Error al crear categoría: ' + e.message);
+                                setSaving(false);
+                                return;
+                              } finally {
+                                setSaving(false);
+                              }
+                            }
+
+                            setForm({ ...form, category: catName });
+
+                            if (selectEl) selectEl.value = '';
+                            if (customInput) {
+                              customInput.value = '';
+                              customInput.style.display = 'none';
+                            }
+                          }}
+                          className="btn-gold"
+                          style={{ padding: '8px 14px', fontSize: 12, height: 'fit-content', cursor: 'pointer', whiteSpace: 'nowrap', borderRadius: 8 }}
+                        >
+                          Agregar
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
               const list = lookupLists[field.relation] || [];
               const filteredList = (entityName === 'categories' && field.relation === 'categories' && isEdit)
                 ? list.filter(item => item.id !== editEntity.id)
@@ -134,53 +244,11 @@ export default function EntityModal({ entityName, editEntity, lookupLists, apis,
                 >
                   <option value="">Seleccione una opción...</option>
                   {filteredList.map(item => (
-                    <option key={item.id} value={item.id}>
+                    <option key={item.id} value={field.name === 'category' ? item.name : item.id}>
                       {item.name}
                     </option>
                   ))}
                 </Select>
-              );
-            }
-
-            if (entityName === 'products' && field.name === 'category') {
-              const availableCategories = Array.from(
-                new Set((lookupLists.products || []).map(p => p.category).filter(Boolean))
-              );
-              const isCustomActive = form.category && !availableCategories.includes(form.category);
-
-              return (
-                <div key={field.name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <Select
-                    label={field.label}
-                    value={isCustomActive ? 'CUSTOM' : (form.category || '')}
-                    onChange={e => {
-                      const val = e.target.value;
-                      if (val === 'CUSTOM') {
-                        setForm({ ...form, category: '' });
-                      } else {
-                        setForm({ ...form, category: val });
-                      }
-                    }}
-                    required={field.required}
-                  >
-                    <option value="">Seleccione una categoría...</option>
-                    {availableCategories.map(cat => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                    <option value="CUSTOM">+ Crear nueva categoría...</option>
-                  </Select>
-
-                  {(isCustomActive || form.category === '' || !availableCategories.includes(form.category)) && (
-                    <Input
-                      placeholder="Escribe el nombre de la nueva categoría"
-                      value={form.category || ''}
-                      onChange={e => setForm({ ...form, category: e.target.value })}
-                      required={field.required}
-                    />
-                  )}
-                </div>
               );
             }
 
@@ -198,7 +266,7 @@ export default function EntityModal({ entityName, editEntity, lookupLists, apis,
           })}
 
           {/* Sub-Modifiers List builder inside Product Form */}
-          {entityName === 'products' && (
+          {entityName === 'items' && (
             <div style={{ marginTop: 10, borderTop: `1px solid ${B}`, paddingTop: 16 }}>
               <label className="label" style={{ fontWeight: '700', fontSize: 13, color: D, marginBottom: 4, display: 'block' }}>
                 🛠️ Modificadores (ej: Salsas, Queso Extra)
