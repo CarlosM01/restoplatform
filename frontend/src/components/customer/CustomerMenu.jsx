@@ -6,6 +6,7 @@ import MenuStep from './MenuStep.jsx';
 import CartStep from './CartStep.jsx';
 import PaymentStep from './PaymentStep.jsx';
 import CustomizerModal from './CustomizerModal.jsx';
+import ProductDetailDrawer from './ProductDetailDrawer.jsx';
 import { fmt } from '../../lib/api.js';
 import './CustomerMenu.css';
 
@@ -25,6 +26,8 @@ export default function CustomerMenu() {
     customizingItem,
     setCustomizingItem,
     selectedOptions,
+    activeDetailProduct,
+    setActiveDetailProduct,
     loading,
     error,
     processing,
@@ -34,6 +37,7 @@ export default function CustomerMenu() {
     customTotal,
     toggleOption,
     handleAddCustomized,
+    handleAddDetailedProduct,
     add,
     upd,
     procesarCheckout,
@@ -113,6 +117,10 @@ export default function CustomerMenu() {
             add={add}
             upd={upd}
             fmt={fmt}
+            setActiveDetailProduct={setActiveDetailProduct}
+            cnt={cnt}
+            total={total}
+            setStep={setStep}
           />
         )}
 
@@ -173,6 +181,16 @@ export default function CustomerMenu() {
           customTotal={customTotal}
           handleAddCustomized={handleAddCustomized}
           onClose={() => setCustomizingItem(null)}
+          fmt={fmt}
+        />
+      )}
+
+      {/* Product Detail Drawer */}
+      {activeDetailProduct && (
+        <ProductDetailDrawer
+          product={activeDetailProduct}
+          onClose={() => setActiveDetailProduct(null)}
+          onAdd={handleAddDetailedProduct}
           fmt={fmt}
         />
       )}

@@ -1,0 +1,9 @@
+# Pyrefly Configuration
+# Tells the Pyrefly static type checker where to locate python sources for import resolution.
+
+search_path = [
+    "backend",
+]
+
+[errors]
+missing-import = false

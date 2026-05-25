@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select
 from app.core.database import get_db
 from app.deps import require_encargado, require_admin
-from app.models import Product, Inventory, User, Role
-from app.schemas import ProductOut, ProductCreate, ProductUpdate, StockUpdate
+from app.models import Product, ProductCategory, Inventory, User, Role
+from app.schemas import ProductOut, ProductCreate, ProductUpdate, StockUpdate, ProductCategoryOut
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -21,14 +21,12 @@ def listar(
     return db.scalars(q).all()
 
 
-@router.get("/categories", response_model=list[str])
+@router.get("/categories", response_model=list[ProductCategoryOut])
 def listar_categorias(db: Session = Depends(get_db)):
-    """Returns distinct active product categories"""
+    """Returns distinct active product categories with their images"""
     cats = db.scalars(
-        select(Product.category)
-        .where(Product.is_active == True)
-        .distinct()
-        .order_by(Product.category)
+        select(ProductCategory)
+        .order_by(ProductCategory.name)
     ).all()
     return cats
 
@@ -54,6 +52,9 @@ def crear(
         category=data.category,
         image=data.image,
         modifiers=data.modifiers,
+        rating=data.rating,
+        tag_class=data.tag_class,
+        tag_label=data.tag_label,
     )
     db.add(p)
     db.flush()

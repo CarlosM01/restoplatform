@@ -53,6 +53,12 @@ class InventoryOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ProductCategoryOut(BaseModel):
+    name: str
+    image: str | None = None
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ProductBase(BaseModel):
     name: str
     description: str = ""
@@ -60,6 +66,9 @@ class ProductBase(BaseModel):
     category: str
     image: str = ""
     modifiers: list[dict] | None = None
+    rating: float | None = 4.5
+    tag_class: str | None = None
+    tag_label: str | None = None
 
 
 class ProductCreate(ProductBase):
@@ -74,12 +83,41 @@ class ProductUpdate(BaseModel):
     image: str | None = None
     is_active: bool | None = None
     modifiers: list[dict] | None = None
+    rating: float | None = None
+    tag_class: str | None = None
+    tag_label: str | None = None
+
+
+class ProductAllergenOut(BaseModel):
+    id: int
+    name: str
+    severity: str | None = None
+    icon: str | None = None
+    label: str | None = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductSizeOut(BaseModel):
+    id: int
+    name: str
+    price_delta: float
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductExtraOut(BaseModel):
+    id: int
+    name: str
+    price: float
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProductOut(ProductBase):
     id: int
     is_active: bool
     inventory: InventoryOut | None = None
+    allergens: list[ProductAllergenOut] = []
+    sizes: list[ProductSizeOut] = []
+    extras: list[ProductExtraOut] = []
     model_config = ConfigDict(from_attributes=True)
 
 

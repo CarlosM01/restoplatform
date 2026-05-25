@@ -8,12 +8,12 @@ from sqlalchemy import select
 from app.core.database import SessionLocal, engine, Base
 from app.core.security import hash_password
 from app.models import (
-    User, Table, Product, Inventory, Role,
+    User, Table, Product, ProductCategory, Inventory, Role,
     Category, MenuItem, MenuItemVariant, ModifierGroup, Modifier,
     Supplier, Ingredient, DietaryTag, Allergen,
     MenuItemModifierGroup, MenuItemDietaryTag, VariantModifierGroup,
     VariantIngredient, MenuItemIngredient, ModifierIngredient,
-    IngredientAllergen,
+    IngredientAllergen, ProductAllergen, ProductSize, ProductExtra,
 )
 
 
@@ -61,29 +61,118 @@ def seed():
                 db.add(Table(number=i, capacity=cap))
             db.commit()
 
+        # ===== PRODUCT CATEGORIES =====
+        if not db.scalar(select(ProductCategory)):
+            print("Creando categorías de productos...")
+            cat_data = [
+                ("Carne", "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=100&auto=format&fit=crop&q=60"),
+                ("Pollo", "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=100&auto=format&fit=crop&q=60"),
+                ("Ensalada", "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=100&auto=format&fit=crop&q=60"),
+                ("Entrada", "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=100&auto=format&fit=crop&q=60"),
+                ("Pescado", "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=100&auto=format&fit=crop&q=60"),
+                ("Pizza", "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=100&auto=format&fit=crop&q=60"),
+            ]
+            for name, img in cat_data:
+                db.add(ProductCategory(name=name, image=img))
+            db.commit()
+
         # ===== PRODUCTOS (LEGACY/Venta) =====
         if not db.scalar(select(Product)):
             print("Creando productos legacy...")
             productos_data = [
-                ("Lomo a lo Pobre", "Lomo vetado, huevos fritos, papas y cebolla", 8990, "Carne", "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600&auto=format&fit=crop&q=60", 20),
-                ("Pollo Arvejado", "Trutro de pollo con arvejas y arroz", 6990, "Pollo", "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600&auto=format&fit=crop&q=60", 25),
-                ("Cazuela de Vacuno", "Caldo con zapallo, choclo, papa y carne", 5990, "Carne", "https://images.unsplash.com/photo-1547592180-85f173990554?w=600&auto=format&fit=crop&q=60", 15),
-                ("Ensalada César", "Lechuga, crutones, parmesano y aderezo", 4990, "Ensalada", "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=600&auto=format&fit=crop&q=60", 30),
-                ("Pastel de Choclo", "Pino, pollo, huevo duro y pasta de choclo", 7490, "Carne", "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=60", 18),
-                ("Empanadas de Pino", "Masa horneada rellena de pino tradicional", 2490, "Entrada", "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=60", 50),
-                ("Congrio Frito", "Congrio dorado con ensalada y papas mayo", 9990, "Pescado", "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&auto=format&fit=crop&q=60", 12),
-                ("Humitas", "Pasta de choclo envuelta en hojas", 3990, "Entrada", "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&auto=format&fit=crop&q=60", 25),
+                ("Lomo a lo Pobre", "Lomo vetado, huevos fritos, papas y cebolla", 8990, "Carne", "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600&auto=format&fit=crop&q=60", 20, 4.8, "popular", "🔥 Popular"),
+                ("Pollo Arvejado", "Trutro de pollo con arvejas y arroz", 6990, "Pollo", "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600&auto=format&fit=crop&q=60", 25, 4.5, None, None),
+                ("Cazuela de Vacuno", "Caldo con zapallo, choclo, papa y carne", 5990, "Carne", "https://images.unsplash.com/photo-1547592180-85f173990554?w=600&auto=format&fit=crop&q=60", 15, 4.6, None, None),
+                ("Ensalada César", "Lechuga, crutones, parmesano y aderezo", 4990, "Ensalada", "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=600&auto=format&fit=crop&q=60", 30, 4.3, None, None),
+                ("Pastel de Choclo", "Pino, pollo, huevo duro y pasta de choclo", 7490, "Carne", "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=60", 18, 4.5, "chef", "👨‍🍳 Chef's choice"),
+                ("Empanadas de Pino", "Masa horneada rellena de pino tradicional", 2490, "Entrada", "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=60", 50, 4.5, "popular", "🔥 Popular"),
+                ("Congrio Frito", "Congrio dorado con ensalada y papas mayo", 9990, "Pescado", "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&auto=format&fit=crop&q=60", 12, 4.7, "chef", "👨‍🍳 Chef's choice"),
+                ("Humitas", "Pasta de choclo envuelta en hojas", 3990, "Entrada", "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&auto=format&fit=crop&q=60", 25, 4.4, "vegan", "🌱 Vegano"),
             ]
-            for name, desc, price, cat, img, stock in productos_data:
+
+            details = {
+                "Lomo a lo Pobre": {
+                    "allergens": [("Huevo", "Alta"), ("Gluten", "Moderada")],
+                    "sizes": [("Individual", 0.0), ("Familiar", 7000.0)],
+                    "extras": [("Huevo Frito Extra", 600.0), ("Cebolla Caramelizada", 800.0), ("Papas Fritas Extra", 1500.0)]
+                },
+                "Pollo Arvejado": {
+                    "allergens": [("Gluten", "Moderada")],
+                    "sizes": [("Porción Normal", 0.0), ("Porción Gigante", 2500.0)],
+                    "extras": [("Arroz Extra", 800.0), ("Papas Fritas Extra", 1500.0)]
+                },
+                "Cazuela de Vacuno": {
+                    "allergens": [],
+                    "sizes": [("Plato Mediano", 0.0), ("Plato Grande", 1200.0)],
+                    "extras": [("Carne Extra", 2000.0), ("Papa Extra", 600.0), ("Choclo Extra", 500.0)]
+                },
+                "Ensalada César": {
+                    "allergens": [("Huevo", "Alta"), ("Lácteos", "Alta"), ("Gluten", "Moderada"), ("Pescado", "Alta")],
+                    "sizes": [("Acompañamiento", 0.0), ("Principal", 1800.0)],
+                    "extras": [("Pollo Deshilachado", 1500.0), ("Queso Parmesano Extra", 900.0), ("Crutones Extra", 500.0)]
+                },
+                "Pastel de Choclo": {
+                    "allergens": [("Huevo", "Alta"), ("Lácteos", "Alta")],
+                    "sizes": [("Paila Chica", 0.0), ("Paila Grande", 2000.0)],
+                    "extras": [("Azúcar Flor", 0.0), ("Huevo Duro Extra", 500.0)]
+                },
+                "Empanadas de Pino": {
+                    "allergens": [("Gluten", "Moderada"), ("Huevo", "Alta")],
+                    "sizes": [("Empanada Mediana", 0.0), ("Empanada XL", 1000.0)],
+                    "extras": [("Pebre Cuchareado", 300.0), ("Ají Verde", 200.0)]
+                },
+                "Congrio Frito": {
+                    "allergens": [("Pescado", "Alta"), ("Gluten", "Moderada"), ("Huevo", "Alta")],
+                    "sizes": [("Normal", 0.0), ("Doble Filete", 4500.0)],
+                    "extras": [("Ensalada Chilena Extra", 1200.0), ("Salsa Tártara", 500.0), ("Papas Mayo Extra", 1400.0)]
+                },
+                "Humitas": {
+                    "allergens": [("Lácteos", "Alta")],
+                    "sizes": [("1 Humita", 0.0), ("2 Humitas", 3000.0)],
+                    "extras": [("Ensalada Chilena", 1500.0), ("Azúcar", 200.0)]
+                }
+            }
+
+            for name, desc, price, cat, img, stock, rating, tag_class, tag_label in productos_data:
                 p = Product(
                     name=name,
                     description=desc,
                     price=price,
                     category=cat,
                     image=img,
+                    rating=rating,
+                    tag_class=tag_class,
+                    tag_label=tag_label,
                 )
                 db.add(p)
                 db.flush()
+                
+                # Relational details
+                ALLERGEN_MAP = {
+                    'Huevo': {'icon': '🥚', 'label': 'EGGS'},
+                    'Gluten': {'icon': '🌾', 'label': 'GLUTEN'},
+                    'Lácteos': {'icon': '🥛', 'label': 'DAIRY'},
+                    'Pescado': {'icon': '🐟', 'label': 'FISH'},
+                    'Maní': {'icon': '🥜', 'label': 'PEANUT'},
+                    'Lupino': {'icon': '🌱', 'label': 'LUPIN'},
+                    'Moluscos': {'icon': '🐚', 'label': 'MOLLUSK'},
+                    'Mostaza': {'icon': '🍯', 'label': 'MUSTARD'},
+                }
+                item_details = details.get(name, {"allergens": [], "sizes": [], "extras": []})
+                for all_name, severity in item_details["allergens"]:
+                    all_info = ALLERGEN_MAP.get(all_name, {'icon': '⚠️', 'label': all_name.upper()})
+                    db.add(ProductAllergen(
+                        product_id=p.id,
+                        name=all_name,
+                        severity=severity,
+                        icon=all_info['icon'],
+                        label=all_info['label']
+                    ))
+                for sz_name, price_delta in item_details["sizes"]:
+                    db.add(ProductSize(product_id=p.id, name=sz_name, price_delta=price_delta))
+                for ex_name, ex_price in item_details["extras"]:
+                    db.add(ProductExtra(product_id=p.id, name=ex_name, price=ex_price))
+
                 db.add(Inventory(product_id=p.id, stock=stock, minimum_stock=5))
             db.commit()
 

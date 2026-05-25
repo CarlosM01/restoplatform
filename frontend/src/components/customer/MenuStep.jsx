@@ -2,48 +2,9 @@ import React, { useState } from 'react';
 
 const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
 
-const CAT_IMAGES = {
-  'Todos': 'https://images.unsplash.com/photo-1541532713592-79a0317b6b77?w=100&auto=format&fit=crop&q=60',
-  'Carne': 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=100&auto=format&fit=crop&q=60',
-  'Pollo': 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=100&auto=format&fit=crop&q=60',
-  'Ensalada': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=100&auto=format&fit=crop&q=60',
-  'Entrada': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=100&auto=format&fit=crop&q=60',
-  'Pescado': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=100&auto=format&fit=crop&q=60',
-  'Pizza': 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=100&auto=format&fit=crop&q=60',
-};
+// Category images, product ratings, and tags are retrieved from the database.
 
-const getProductRating = (item) => {
-  const ratings = {
-    'Lomo a lo Pobre': 4.8,
-    'Pizza Napolitana': 4.9,
-    'Congrio Frito': 4.7,
-    'Merluza al Vapor': 4.7,
-    'Cazuela de Vacuno': 4.6,
-    'Pollo Arvejado': 4.5,
-    'Pastel de Choclo': 4.5,
-    'Ensalada César': 4.3,
-    'Ensalada de Quinoa': 4.2,
-    'Humitas': 4.4,
-    'Empanadas de Pino': 4.5,
-  };
-  return ratings[item.name] || 4.5;
-};
-
-const getProductTag = (item) => {
-  const nameLower = item.name.toLowerCase();
-  if (nameLower.includes('quinoa') || nameLower.includes('humita')) {
-    return { class: 'vegan', label: '🌱 Vegano' };
-  }
-  if (nameLower.includes('merluza') || nameLower.includes('congrio') || nameLower.includes('pastel')) {
-    return { class: 'chef', label: '👨‍🍳 Chef\'s choice' };
-  }
-  if (nameLower.includes('lomo') || nameLower.includes('pizza') || nameLower.includes('asado') || nameLower.includes('empanada')) {
-    return { class: 'popular', label: '🔥 Popular' };
-  }
-  return null;
-};
-
-export default function MenuStep({ cats, cat, setCat, items, products = [], cart, flash, add, upd, fmt }) {
+export default function MenuStep({ cats, cat, setCat, items, products = [], cart, flash, add, upd, fmt, setActiveDetailProduct, cnt, total, setStep }) {
   // Local states for advanced filtering
   const [searchQuery, setSearchQuery] = useState('');
   const [priceFilter, setPriceFilter] = useState('all');
@@ -103,6 +64,30 @@ export default function MenuStep({ cats, cat, setCat, items, products = [], cart
   return (
     <div className="menu-step-container">
       
+      {/* QUICK CART LINK */}
+      <div 
+        className={`cart-quick-banner ${cnt === 0 ? 'empty' : ''}`}
+        onClick={() => setStep('cart')}
+      >
+        <div className="cart-quick-left">
+          <div className="cart-quick-icon-wrap">
+            <i className="ti ti-shopping-cart" aria-hidden="true"></i>
+          </div>
+          <div className="cart-quick-info">
+            <span className="cart-quick-title">
+              {cnt > 0 ? 'Mi Carrito' : 'Carrito Vacío'}
+            </span>
+            <span className="cart-quick-subtitle">
+              {cnt > 0 ? `${cnt} ${cnt === 1 ? 'producto seleccionado' : 'productos seleccionados'}` : 'Agrega productos a tu pedido'}
+            </span>
+          </div>
+        </div>
+        <div className="cart-quick-right">
+          {cnt > 0 && <span className="cart-quick-total">{fmt(total)}</span>}
+          <i className="ti ti-chevron-right cart-quick-arrow" aria-hidden="true"></i>
+        </div>
+      </div>
+
       {/* SEARCH AND FILTERS */}
       <div className="search-wrap">
         <i className="ti ti-search icon-left" aria-hidden="true"></i>
@@ -189,20 +174,20 @@ export default function MenuStep({ cats, cat, setCat, items, products = [], cart
       <div className="cats" id="catBar">
         {cats.map(c => (
           <div 
-            key={c} 
-            className={`cat-chip ${cat === c ? 'active' : ''}`} 
-            onClick={() => setCat(c)}
+            key={c.name} 
+            className={`cat-chip ${cat === c.name ? 'active' : ''}`} 
+            onClick={() => setCat(c.name)}
           >
             <span className="chip-emoji">
-              {isUrl(CAT_IMAGES[c]) ? (
-                <img src={CAT_IMAGES[c]} alt={c} className="category-chip-img" />
+              {isUrl(c.image) ? (
+                <img src={c.image} alt={c.name} className="category-chip-img" />
               ) : (
-                CAT_IMAGES[c] || '🍽️'
+                c.image || '🍽️'
               )}
             </span>
-            {c}
-            <span className="chip-count" id={`cnt-${c}`}>
-              {getCategoryCount(c)}
+            {c.name}
+            <span className="chip-count" id={`cnt-${c.name}`}>
+              {getCategoryCount(c.name)}
             </span>
           </div>
         ))}
@@ -227,14 +212,14 @@ export default function MenuStep({ cats, cat, setCat, items, products = [], cart
           {sortedItems.map(i => {
             const incartQty = cart.filter(c => c.id === i.id).reduce((sum, c) => sum + c.qty, 0);
             const stockOk = i.inventory && i.inventory.stock > 0;
-            const rating = getProductRating(i);
-            const tag = getProductTag(i);
+            const rating = i.rating !== undefined && i.rating !== null ? i.rating : 4.5;
 
             return (
               <div 
                 key={i.id} 
                 className={`menu-card ${incartQty > 0 ? 'selected-card' : ''}`}
                 style={{ opacity: stockOk ? 1 : 0.6 }}
+                onClick={() => setActiveDetailProduct(i)}
               >
                 <div className="card-thumb">
                   {isUrl(i.image) ? (
@@ -258,23 +243,23 @@ export default function MenuStep({ cats, cat, setCat, items, products = [], cart
                         <div className="rating">
                           <i className="ti ti-star-filled" aria-hidden="true"></i> {rating.toFixed(1)}
                         </div>
-                        {tag && (
-                          <span className={`card-tag ${tag.class}`}>
-                            {tag.label}
+                        {i.tag_class && i.tag_label && (
+                          <span className={`card-tag ${i.tag_class}`}>
+                            {i.tag_label}
                           </span>
                         )}
                       </div>
                     </div>
 
                     {incartQty > 0 ? (
-                      <div className="cart-qty-controls">
+                      <div className="cart-qty-controls" onClick={(e) => e.stopPropagation()}>
                         {i.modifiers && i.modifiers.length > 0 ? (
                           <>
                             <span className="qty-tag">
                               {incartQty} agregados
                             </span>
                             <button
-                              onClick={() => add(i)}
+                              onClick={(e) => { e.stopPropagation(); add(i); }}
                               disabled={!stockOk || incartQty >= i.inventory.stock}
                               className="add-btn-small"
                             >
@@ -284,7 +269,7 @@ export default function MenuStep({ cats, cat, setCat, items, products = [], cart
                         ) : (
                           <>
                             <button
-                              onClick={() => upd(i.id, -1)}
+                              onClick={(e) => { e.stopPropagation(); upd(i.id, -1); }}
                               className="cart-qty-btn minus"
                             >
                               −
@@ -293,7 +278,7 @@ export default function MenuStep({ cats, cat, setCat, items, products = [], cart
                               {incartQty}
                             </span>
                             <button
-                              onClick={() => upd(i.id, 1)}
+                              onClick={(e) => { e.stopPropagation(); upd(i.id, 1); }}
                               disabled={!stockOk || incartQty >= i.inventory.stock}
                               className="cart-qty-btn plus"
                             >
@@ -305,7 +290,7 @@ export default function MenuStep({ cats, cat, setCat, items, products = [], cart
                     ) : (
                       <button 
                         className="add-btn" 
-                        onClick={() => add(i)}
+                        onClick={(e) => { e.stopPropagation(); add(i); }}
                         disabled={!stockOk}
                         style={{
                           background: flash === i.id ? 'var(--color-success)' : '',

@@ -50,8 +50,53 @@ class Product(Base):
     image: Mapped[str] = mapped_column(String(255), default="")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     modifiers: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True, default=list)
+    rating: Mapped[float | None] = mapped_column(Float, nullable=True, default=4.5)
+    tag_class: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    tag_label: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     inventory: Mapped["Inventory | None"] = relationship(back_populates="product", uselist=False, cascade="all, delete-orphan")
+    allergens: Mapped[list["ProductAllergen"]] = relationship(back_populates="product", cascade="all, delete-orphan")
+    sizes: Mapped[list["ProductSize"]] = relationship(back_populates="product", cascade="all, delete-orphan")
+    extras: Mapped[list["ProductExtra"]] = relationship(back_populates="product", cascade="all, delete-orphan")
+
+
+class ProductCategory(Base):
+    __tablename__ = "product_categories"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(50), unique=True)
+    image: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+
+class ProductAllergen(Base):
+    __tablename__ = "product_allergens"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
+    name: Mapped[str] = mapped_column(String(100))
+    severity: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    icon: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    label: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+    product: Mapped["Product"] = relationship(back_populates="allergens")
+
+
+class ProductSize(Base):
+    __tablename__ = "product_sizes"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
+    name: Mapped[str] = mapped_column(String(50))
+    price_delta: Mapped[float] = mapped_column(Float, default=0.0)
+
+    product: Mapped["Product"] = relationship(back_populates="sizes")
+
+
+class ProductExtra(Base):
+    __tablename__ = "product_extras"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
+    name: Mapped[str] = mapped_column(String(100))
+    price: Mapped[float] = mapped_column(Float, default=0.0)
+
+    product: Mapped["Product"] = relationship(back_populates="extras")
 
 
 class Inventory(Base):
