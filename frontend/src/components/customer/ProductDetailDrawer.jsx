@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
-
-// Allergen metadata is loaded dynamically from the database
+import React, { useState, useCallback } from 'react';
+import ImageLightbox from './ImageLightbox.jsx';
 
 const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
+
+// Build unified gallery array: prefer product.gallery, fallback to single product.image
+function buildGallery(product) {
+  if (product.gallery && product.gallery.length > 0) {
+    return product.gallery.filter(g => isUrl(g.url));
+  }
+  if (isUrl(product.image)) {
+    return [{ url: product.image, alt_text: product.name }];
+  }
+  return [];
+}
 
 export default function ProductDetailDrawer({ product, onClose, onAdd, fmt }) {
   if (!product) return null;
@@ -15,6 +25,23 @@ export default function ProductDetailDrawer({ product, onClose, onAdd, fmt }) {
   // Keep track of checked extras
   const [selectedExtras, setSelectedExtras] = useState([]);
   const [quantity, setQuantity] = useState(1);
+
+  // Gallery state
+  const gallery = buildGallery(product);
+  const [heroIdx, setHeroIdx] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+
+  const prevSlide = useCallback(() => setHeroIdx(i => (i - 1 + gallery.length) % gallery.length), [gallery.length]);
+  const nextSlide = useCallback(() => setHeroIdx(i => (i + 1) % gallery.length), [gallery.length]);
+
+  const onTouchStart = (e) => setTouchStart(e.touches[0].clientX);
+  const onTouchEnd = (e) => {
+    if (touchStart === null) return;
+    const delta = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(delta) > 40) delta > 0 ? nextSlide() : prevSlide();
+    setTouchStart(null);
+  };
 
   const toggleExtra = (extra) => {
     setSelectedExtras((prev) => {
@@ -38,6 +65,8 @@ export default function ProductDetailDrawer({ product, onClose, onAdd, fmt }) {
     onClose();
   };
 
+  const currentHero = gallery[heroIdx];
+
   return (
     <div className="drawer-overlay" onClick={onClose}>
       <div className="drawer-container" onClick={(e) => e.stopPropagation()}>
@@ -56,12 +85,71 @@ export default function ProductDetailDrawer({ product, onClose, onAdd, fmt }) {
         </div>
 
         <div className="drawer-scrollable-content">
-          {/* Hero image area with dynamic content */}
-          <div className="drawer-hero-image">
-            {isUrl(product.image) ? (
-              <img src={product.image} alt={product.name} />
+          {/* ─── GALLERY HERO AREA ─── */}
+          <div
+            className="drawer-hero-image gallery-hero"
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            onClick={() => gallery.length > 0 && setLightboxOpen(true)}
+            style={{ cursor: gallery.length > 0 ? 'zoom-in' : 'default', position: 'relative', overflow: 'hidden' }}
+          >
+            {currentHero ? (
+              <img
+                key={currentHero.url}
+                src={currentHero.url}
+                alt={currentHero.alt_text || product.name}
+                className="gallery-hero-img"
+              />
             ) : (
               <div className="drawer-hero-placeholder">{product.image || '🍽️'}</div>
+            )}
+
+            {/* Zoom hint overlay */}
+            {gallery.length > 0 && (
+              <div className="gallery-zoom-hint" aria-hidden="true">
+                🔍
+              </div>
+            )}
+
+            {/* Prev/Next buttons — only when gallery has multiple */}
+            {gallery.length > 1 && (
+              <>
+                <button
+                  className="gallery-nav-btn gallery-prev"
+                  onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+                  aria-label="Imagen anterior"
+                >
+                  ‹
+                </button>
+                <button
+                  className="gallery-nav-btn gallery-next"
+                  onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+                  aria-label="Siguiente imagen"
+                >
+                  ›
+                </button>
+              </>
+            )}
+
+            {/* Gallery count badge */}
+            {gallery.length > 1 && (
+              <span className="gallery-count-badge" aria-hidden="true">
+                🖼 {gallery.length}
+              </span>
+            )}
+
+            {/* Dot pagination */}
+            {gallery.length > 1 && (
+              <div className="gallery-dots" onClick={(e) => e.stopPropagation()}>
+                {gallery.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`gallery-dot ${i === heroIdx ? 'active' : ''}`}
+                    onClick={() => setHeroIdx(i)}
+                    aria-label={`Ver imagen ${i + 1}`}
+                  />
+                ))}
+              </div>
             )}
           </div>
 
@@ -86,14 +174,14 @@ export default function ProductDetailDrawer({ product, onClose, onAdd, fmt }) {
                 <h3 className="drawer-section-title">Ingredientes</h3>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
                   {product.ingredients.map((ing, idx) => (
-                    <span 
-                      key={idx} 
-                      style={{ 
-                        background: '#FAF9F6', 
-                        border: '1px solid var(--color-border)', 
-                        padding: '4px 12px', 
-                        borderRadius: '20px', 
-                        fontSize: '12px', 
+                    <span
+                      key={idx}
+                      style={{
+                        background: '#FAF9F6',
+                        border: '1px solid var(--color-border)',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
                         color: 'var(--color-dark)',
                         fontWeight: '600'
                       }}
@@ -227,6 +315,15 @@ export default function ProductDetailDrawer({ product, onClose, onAdd, fmt }) {
           </div>
         </div>
       </div>
+
+      {/* Full-screen lightbox */}
+      {lightboxOpen && gallery.length > 0 && (
+        <ImageLightbox
+          images={gallery}
+          startIndex={heroIdx}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </div>
   );
 }

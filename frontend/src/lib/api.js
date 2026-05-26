@@ -140,6 +140,16 @@ export const updateStock = (id, stock, minimum_stock) =>
     body: JSON.stringify({ stock, minimum_stock }),
   });
 
+// Gallery
+export const getProductGallery = (id) =>
+  api(`/products/${id}/gallery`);
+
+export const setProductGallery = (id, images) =>
+  api(`/products/${id}/gallery`, {
+    method: 'PUT',
+    body: JSON.stringify({ images }),
+  });
+
 export const fmt = (n) => '$' + n.toLocaleString('es-CL');
 
 export { ApiError };

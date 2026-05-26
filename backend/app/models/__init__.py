@@ -59,6 +59,10 @@ class Product(Base):
     allergens: Mapped[list["ProductAllergen"]] = relationship(back_populates="product", cascade="all, delete-orphan")
     sizes: Mapped[list["ProductSize"]] = relationship(back_populates="product", cascade="all, delete-orphan")
     extras: Mapped[list["ProductExtra"]] = relationship(back_populates="product", cascade="all, delete-orphan")
+    gallery: Mapped[list["ProductImageGallery"]] = relationship(
+        back_populates="product", cascade="all, delete-orphan",
+        order_by="ProductImageGallery.sort_order",
+    )
 
 
 class ProductCategory(Base):
@@ -98,6 +102,17 @@ class ProductExtra(Base):
     price: Mapped[float] = mapped_column(Float, default=0.0)
 
     product: Mapped["Product"] = relationship(back_populates="extras")
+
+
+class ProductImageGallery(Base):
+    __tablename__ = "product_image_gallery"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
+    url: Mapped[str] = mapped_column(String(500))
+    alt_text: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+
+    product: Mapped["Product"] = relationship(back_populates="gallery")
 
 
 class Inventory(Base):

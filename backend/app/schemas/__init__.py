@@ -121,6 +121,24 @@ class ProductExtraOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ProductImageGalleryOut(BaseModel):
+    id: int
+    url: str
+    alt_text: str | None = None
+    sort_order: int
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductImageGalleryItem(BaseModel):
+    url: str
+    alt_text: str | None = None
+    sort_order: int = 0
+
+
+class ProductImageBulkSet(BaseModel):
+    images: list[ProductImageGalleryItem]
+
+
 class ProductOut(ProductBase):
     id: int
     is_active: bool
@@ -128,6 +146,7 @@ class ProductOut(ProductBase):
     allergens: list[ProductAllergenOut] = []
     sizes: list[ProductSizeOut] = []
     extras: list[ProductExtraOut] = []
+    gallery: list[ProductImageGalleryOut] = []
     model_config = ConfigDict(from_attributes=True)
 
 

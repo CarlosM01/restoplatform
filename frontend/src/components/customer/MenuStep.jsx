@@ -227,6 +227,12 @@ export default function MenuStep({ cats, cat, setCat, items, products = [], cart
                   ) : (
                     i.image || '🍽️'
                   )}
+                  {/* Gallery count badge */}
+                  {i.gallery && i.gallery.length > 1 && (
+                    <span className="card-gallery-badge" aria-label={`${i.gallery.length} fotos`}>
+                      🖼 {i.gallery.length}
+                    </span>
+                  )}
                 </div>
                 <div className="card-body">
                   <div className="card-header">

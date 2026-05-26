@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select
 from app.core.database import get_db
 from app.deps import require_encargado, require_admin
-from app.models import Product, ProductCategory, Inventory, User, Role, ProductAllergen, ProductSize, ProductExtra
+from app.models import Product, ProductCategory, Inventory, User, Role, ProductAllergen, ProductSize, ProductExtra, ProductImageGallery
 from app.schemas import ProductOut, ProductCreate, ProductUpdate, StockUpdate, ProductCategoryOut
+from app.schemas import ProductImageGalleryOut, ProductImageBulkSet
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -15,10 +16,16 @@ def listar(
     db: Session = Depends(get_db),
 ):
     """Listado público de products activos"""
-    q = select(Product).options(joinedload(Product.inventory)).where(Product.is_active == True)
+    q = select(Product).options(
+        joinedload(Product.inventory),
+        joinedload(Product.allergens),
+        joinedload(Product.sizes),
+        joinedload(Product.extras),
+        joinedload(Product.gallery),
+    ).where(Product.is_active == True)
     if category and category != "Todos":
         q = q.where(Product.category == category)
-    return db.scalars(q).all()
+    return db.scalars(q).unique().all()
 
 
 @router.get("/categories", response_model=list[ProductCategoryOut])
@@ -192,3 +199,52 @@ def eliminar(
         raise HTTPException(404)
     db.delete(p)
     db.commit()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Product Image Gallery
+# ═══════════════════════════════════════════════════════════════════════════
+
+@router.get("/{product_id}/gallery", response_model=list[ProductImageGalleryOut])
+def get_gallery(
+    product_id: int,
+    db: Session = Depends(get_db),
+):
+    """Returns the ordered gallery images for a product."""
+    p = db.get(Product, product_id)
+    if not p:
+        raise HTTPException(404, "Product no encontrado")
+    return p.gallery
+
+
+@router.put("/{product_id}/gallery", response_model=list[ProductImageGalleryOut])
+def set_gallery(
+    product_id: int,
+    data: ProductImageBulkSet,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_encargado),
+):
+    """Bulk-replace the gallery for a product. Clears existing images and writes the new ordered list."""
+    p = db.get(Product, product_id)
+    if not p:
+        raise HTTPException(404, "Product no encontrado")
+
+    # Clear existing gallery
+    db.query(ProductImageGallery).filter(ProductImageGallery.product_id == product_id).delete()
+
+    # Insert new gallery items
+    for idx, item in enumerate(data.images):
+        db.add(ProductImageGallery(
+            product_id=product_id,
+            url=item.url,
+            alt_text=item.alt_text,
+            sort_order=item.sort_order if item.sort_order != 0 else idx,
+        ))
+
+    # Also update the primary image to match first gallery item (backwards-compat)
+    if data.images:
+        p.image = data.images[0].url
+
+    db.commit()
+    db.refresh(p)
+    return p.gallery

@@ -9,6 +9,7 @@ import AllergenSelector from './AllergenSelector.jsx';
 import VariationSelector from './VariationSelector.jsx';
 import ModifierGroupAccordion from './ModifierGroupAccordion.jsx';
 import ProductPreviewCard from './ProductPreviewCard.jsx';
+import ImageGalleryEditor from './ImageGalleryEditor.jsx';
 import { FIELD_CONFIGS } from './FieldConfigs.js';
 import { fmt } from '../../lib/api.js';
 
@@ -42,6 +43,14 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
     init.allergens = editEntity?.allergens ? editEntity.allergens.map(a => ({ name: a.name, severity: a.severity, icon: a.icon, label: a.label })) : [];
     init.sizes = editEntity?.sizes ? editEntity.sizes.map(s => ({ name: s.name, price_delta: s.price_delta })) : [];
     init.extras = editEntity?.extras ? editEntity.extras.map(e => ({ name: e.name, price: e.price })) : [];
+    // Gallery: initialize from existing gallery data or seed with primary image
+    if (editEntity?.gallery && editEntity.gallery.length > 0) {
+      init.gallery = editEntity.gallery.map((g, i) => ({ url: g.url, alt_text: g.alt_text || '', sort_order: i }));
+    } else if (editEntity?.image) {
+      init.gallery = [{ url: editEntity.image, alt_text: '', sort_order: 0 }];
+    } else {
+      init.gallery = [];
+    }
     return init;
   });
 
@@ -117,6 +126,11 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
     parsed.allergens = form.allergens || [];
     parsed.sizes = form.sizes || [];
     parsed.extras = form.extras || [];
+    // Sync primary image from first gallery item
+    if (form.gallery && form.gallery.length > 0 && form.gallery[0].url) {
+      parsed.image = form.gallery[0].url;
+    }
+    parsed.gallery = form.gallery || [];
 
     try {
       if (isEdit) {
@@ -217,7 +231,7 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
         )}
 
         {/* STEP CONTAINER BODY */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, minHeight: 0 }}>
+        <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
           
           {/* STEP 1: BASIC INFORMATION */}
           {activeStep === 0 && (
@@ -262,11 +276,12 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
                 onChange={e => setForm({ ...form, description: e.target.value })}
               />
 
-              <Input
-                label="URL de la Imagen"
-                placeholder="Pegar enlace de imagen (ej: Unsplash)"
-                value={form.image || ''}
-                onChange={e => setForm({ ...form, image: e.target.value })}
+              <ImageGalleryEditor
+                gallery={form.gallery || []}
+                onChange={(newGallery) => {
+                  const primaryUrl = newGallery.length > 0 ? newGallery[0].url : '';
+                  setForm({ ...form, gallery: newGallery, image: primaryUrl });
+                }}
               />
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

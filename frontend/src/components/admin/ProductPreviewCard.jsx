@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function ProductPreviewCard({ form, fmt }) {
   const G = 'var(--color-gold)';
@@ -7,6 +7,26 @@ export default function ProductPreviewCard({ form, fmt }) {
   const B = 'var(--color-border)';
 
   const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
+
+  // Gallery cycling: auto-advance every 2s when multiple gallery images exist
+  const galleryImages = (form.gallery || []).filter(g => isUrl(g.url));
+  const hasGallery = galleryImages.length > 1;
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    if (!hasGallery) {
+      setActiveSlide(0);
+      return;
+    }
+    const timer = setInterval(() => {
+      setActiveSlide(prev => (prev + 1) % galleryImages.length);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [hasGallery, galleryImages.length]);
+
+  const heroUrl = hasGallery
+    ? galleryImages[activeSlide]?.url
+    : isUrl(form.image) ? form.image : null;
 
   return (
     <div style={{
@@ -29,8 +49,16 @@ export default function ProductPreviewCard({ form, fmt }) {
         
         {/* Card Thumbnail */}
         <div className="card-thumb" style={{ height: '170px', background: '#FFF8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', overflow: 'hidden', position: 'relative' }}>
-          {form.image && isUrl(form.image) ? (
-            <img src={form.image} alt={form.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          {heroUrl ? (
+            <img
+              key={heroUrl}
+              src={heroUrl}
+              alt={form.name}
+              style={{
+                width: '100%', height: '100%', objectFit: 'cover',
+                animation: hasGallery ? 'previewFadeIn 0.4s ease' : 'none',
+              }}
+            />
           ) : (
             <span>🍽️</span>
           )}
@@ -38,6 +66,31 @@ export default function ProductPreviewCard({ form, fmt }) {
             <span className={`card-tag ${form.tag_class || 'popular'}`} style={{ position: 'absolute', top: 12, left: 12, background: form.tag_class === 'vegan' ? '#2ecc71' : (form.tag_class === 'chef' ? 'var(--color-dark)' : G), color: '#FFF', fontSize: 10, fontWeight: '700', padding: '4px 8px', borderRadius: 4, textTransform: 'uppercase' }}>
               {form.tag_label}
             </span>
+          )}
+          {/* Gallery count badge */}
+          {hasGallery && (
+            <span style={{ position: 'absolute', bottom: 8, right: 8, background: 'rgba(0,0,0,0.55)', color: '#FFF', fontSize: 9, fontWeight: '700', padding: '3px 7px', borderRadius: 20, backdropFilter: 'blur(4px)' }}>
+              🖼 {galleryImages.length} fotos
+            </span>
+          )}
+          {/* Dot indicators */}
+          {hasGallery && (
+            <div style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 4 }}>
+              {galleryImages.map((_, i) => (
+                <div
+                  key={i}
+                  onClick={() => setActiveSlide(i)}
+                  style={{
+                    width: i === activeSlide ? 14 : 5,
+                    height: 5,
+                    borderRadius: 3,
+                    background: i === activeSlide ? G : 'rgba(255,255,255,0.6)',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                  }}
+                />
+              ))}
+            </div>
           )}
         </div>
 
