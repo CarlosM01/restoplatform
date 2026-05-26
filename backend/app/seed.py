@@ -8,7 +8,7 @@ from sqlalchemy import select
 from app.core.database import SessionLocal, engine, Base
 from app.core.security import hash_password
 from app.models import (
-    User, Table, Product, ProductCategory, Inventory, Role,
+    User, Table, Product, ProductCategory, Inventory, Role, ProductTag,
     Category, MenuItem, MenuItemVariant, ModifierGroup, Modifier,
     Supplier, Ingredient, DietaryTag, Allergen,
     MenuItemModifierGroup, MenuItemDietaryTag, VariantModifierGroup,
@@ -61,6 +61,18 @@ def seed():
                 db.add(Table(number=i, capacity=cap))
             db.commit()
 
+        # ===== PRODUCT TAGS =====
+        if not db.scalar(select(ProductTag)):
+            print("Creando etiquetas de productos...")
+            tag_data = [
+                ("🔥 Popular", "#FF9F43"),
+                ("👨‍🍳 Chef's choice", "#1B1916"),
+                ("🌱 Vegano", "#2ECC71"),
+            ]
+            for name, color in tag_data:
+                db.add(ProductTag(name=name, color=color))
+            db.commit()
+
         # ===== PRODUCT CATEGORIES =====
         if not db.scalar(select(ProductCategory)):
             print("Creando categorías de productos...")
@@ -80,14 +92,14 @@ def seed():
         if not db.scalar(select(Product)):
             print("Creando productos legacy...")
             productos_data = [
-                ("Lomo a lo Pobre", "Lomo vetado, huevos fritos, papas y cebolla", 8990, "Carne", "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600&auto=format&fit=crop&q=60", 20, 4.8, "popular", "🔥 Popular"),
+                ("Lomo a lo Pobre", "Lomo vetado, huevos fritos, papas y cebolla", 8990, "Carne", "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600&auto=format&fit=crop&q=60", 20, 4.8, "#FF9F43", "🔥 Popular"),
                 ("Pollo Arvejado", "Trutro de pollo con arvejas y arroz", 6990, "Pollo", "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600&auto=format&fit=crop&q=60", 25, 4.5, None, None),
                 ("Cazuela de Vacuno", "Caldo con zapallo, choclo, papa y carne", 5990, "Carne", "https://images.unsplash.com/photo-1547592180-85f173990554?w=600&auto=format&fit=crop&q=60", 15, 4.6, None, None),
                 ("Ensalada César", "Lechuga, crutones, parmesano y aderezo", 4990, "Ensalada", "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=600&auto=format&fit=crop&q=60", 30, 4.3, None, None),
-                ("Pastel de Choclo", "Pino, pollo, huevo duro y pasta de choclo", 7490, "Carne", "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=60", 18, 4.5, "chef", "👨‍🍳 Chef's choice"),
-                ("Empanadas de Pino", "Masa horneada rellena de pino tradicional", 2490, "Entrada", "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=60", 50, 4.5, "popular", "🔥 Popular"),
-                ("Congrio Frito", "Congrio dorado con ensalada y papas mayo", 9990, "Pescado", "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&auto=format&fit=crop&q=60", 12, 4.7, "chef", "👨‍🍳 Chef's choice"),
-                ("Humitas", "Pasta de choclo envuelta en hojas", 3990, "Entrada", "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&auto=format&fit=crop&q=60", 25, 4.4, "vegan", "🌱 Vegano"),
+                ("Pastel de Choclo", "Pino, pollo, huevo duro y pasta de choclo", 7490, "Carne", "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=60", 18, 4.5, "#1B1916", "👨‍🍳 Chef's choice"),
+                ("Empanadas de Pino", "Masa horneada rellena de pino tradicional", 2490, "Entrada", "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=60", 50, 4.5, "#FF9F43", "🔥 Popular"),
+                ("Congrio Frito", "Congrio dorado con ensalada y papas mayo", 9990, "Pescado", "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&auto=format&fit=crop&q=60", 12, 4.7, "#1B1916", "👨‍🍳 Chef's choice"),
+                ("Humitas", "Pasta de choclo envuelta en hojas", 3990, "Entrada", "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&auto=format&fit=crop&q=60", 25, 4.4, "#2ECC71", "🌱 Vegano"),
             ]
 
             details = {

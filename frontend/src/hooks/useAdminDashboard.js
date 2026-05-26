@@ -27,6 +27,7 @@ const apis = {
   ingredients: menuCrud('ingredients'),
   'dietary-tags': menuCrud('dietary-tags'),
   allergens: menuCrud('allergens'),
+  'product-tags': menuCrud('product-tags'),
 };
 
 export default function useAdminDashboard() {
@@ -44,6 +45,7 @@ export default function useAdminDashboard() {
     ingredients: [],
     'dietary-tags': [],
     allergens: [],
+    'product-tags': [],
   });
 
   const [loading, setLoading] = useState(true);
@@ -68,7 +70,7 @@ export default function useAdminDashboard() {
     setLoading(true);
     try {
       const [
-        users, categories, items, variants, modifierGroups, modifiers, suppliers, ingredients, dietaryTags, allergens
+        users, categories, items, variants, modifierGroups, modifiers, suppliers, ingredients, dietaryTags, allergens, productTags
       ] = await Promise.all([
         apis.users.list(),
         apis.categories.list(),
@@ -80,6 +82,7 @@ export default function useAdminDashboard() {
         apis.ingredients.list(),
         apis['dietary-tags'].list(),
         apis.allergens.list(),
+        apis['product-tags'].list(),
       ]);
 
       setData({
@@ -93,6 +96,7 @@ export default function useAdminDashboard() {
         ingredients: ingredients || [],
         'dietary-tags': dietaryTags || [],
         allergens: allergens || [],
+        'product-tags': productTags || [],
       });
     } catch (e) {
       alert('Error cargando datos: ' + e.message);

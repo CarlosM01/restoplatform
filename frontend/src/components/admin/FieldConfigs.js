@@ -9,6 +9,7 @@ export const SECTIONS = [
   { id: 'ingredients', label: 'Ingredientes', category: 'LOGÍSTICA / SALUD' },
   { id: 'dietary-tags', label: 'Etiquetas Dietéticas', category: 'LOGÍSTICA / SALUD' },
   { id: 'allergens', label: 'Alérgenos', category: 'LOGÍSTICA / SALUD' },
+  { id: 'product-tags', label: 'Etiquetas de Productos', category: 'MENÚ' },
 ];
 
 export const FIELD_CONFIGS = {
@@ -80,5 +81,9 @@ export const FIELD_CONFIGS = {
     { name: 'icon_url', label: 'URL del Icono', type: 'text' },
     { name: 'severity', label: 'Gravedad (ej: Alta, Moderada)', type: 'text' },
     { name: 'internal_ref_url', label: 'Enlace de Referencia Interna', type: 'text' },
+  ],
+  'product-tags': [
+    { name: 'name', label: 'Nombre de la Etiqueta (ej: 🔥 Popular)', type: 'text', required: true },
+    { name: 'color', label: 'Color de la Etiqueta', type: 'color', required: true },
   ],
 };

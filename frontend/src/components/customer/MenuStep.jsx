@@ -259,7 +259,10 @@ export default function MenuStep({ cats, cat, setCat, items, products = [], cart
                           <i className="ti ti-star-filled" aria-hidden="true"></i> {rating.toFixed(1)}
                         </div>
                         {i.tag_class && i.tag_label && (
-                          <span className={`card-tag ${i.tag_class}`}>
+                          <span 
+                            className={`card-tag ${typeof i.tag_class === 'string' && i.tag_class.startsWith('#') ? '' : i.tag_class}`}
+                            style={typeof i.tag_class === 'string' && i.tag_class.startsWith('#') ? { background: i.tag_class, color: '#FFF' } : {}}
+                          >
                             {i.tag_label}
                           </span>
                         )}

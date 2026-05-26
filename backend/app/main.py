@@ -10,7 +10,10 @@ from app.routers import auth, products, orders, payments, admin, menu_admin
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Crear tablas si no existen al iniciar la aplicación
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Startup DDL warning: {e}")
     yield
 
 

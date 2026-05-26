@@ -133,6 +133,13 @@ class Table(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
+class ProductTag(Base):
+    __tablename__ = "product_tags"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    color: Mapped[str] = mapped_column(String(50), default="#FF9F43")
+
+
 
 
 class Order(Base):

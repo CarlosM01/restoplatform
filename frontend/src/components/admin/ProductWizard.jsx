@@ -60,7 +60,7 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
         return;
       }
     }
-    
+
     setActiveStep(activeStep + 1);
   };
 
@@ -122,21 +122,21 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
     <div style={{ display: 'flex', height: '78vh', minHeight: 560 }}>
       {/* LEFT WIZARD CONTENT */}
       <div style={{ flex: '1.2', padding: '24px 30px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-        
+
         {/* Horizontal Stepper Progress Tracking */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24, paddingBottom: 16, borderBottom: `1px solid ${B}` }}>
           {steps.map((s, idx) => {
             const isCompleted = idx < activeStep;
             const isActive = idx === activeStep;
-            
+
             return (
-              <div 
-                key={idx} 
-                style={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  flex: 1, 
+              <div
+                key={idx}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  flex: 1,
                   position: 'relative',
                   cursor: 'pointer'
                 }}
@@ -160,9 +160,9 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
                 }}>
                   {isCompleted ? '✓' : s.icon}
                 </div>
-                <span style={{ 
-                  fontSize: 10, 
-                  fontWeight: isActive || isCompleted ? '700' : '500', 
+                <span style={{
+                  fontSize: 10,
+                  fontWeight: isActive || isCompleted ? '700' : '500',
                   color: isActive ? D : M,
                   marginTop: 6,
                   textAlign: 'center',
@@ -195,12 +195,12 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
 
         {/* STEP CONTAINER BODY */}
         <div style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          
+
           {/* STEP 1: BASIC INFORMATION */}
           {activeStep === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <h3 style={{ fontSize: 15, fontWeight: '700', color: D, margin: '0 0 6px 0' }}>📝 Información General del Plato</h3>
-              
+
               <Input
                 label="Nombre del Plato *"
                 placeholder="Ej: Lomo Vetado a lo Pobre"
@@ -250,38 +250,53 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <label className="label" style={{ fontWeight: '700', fontSize: 12.5, color: D }}>Etiqueta Destacada / Badge</label>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {[
-                    { label: '🔥 Popular', class: 'popular' },
-                    { label: '👨‍🍳 Chef\'s choice', class: 'chef' },
-                    { label: '🌱 Vegano', class: 'vegan' },
-                    { label: 'Ninguno', class: '' }
-                  ].map(badge => {
-                    const isSel = form.tag_class === badge.class && (badge.class === '' ? !form.tag_label : form.tag_label === badge.label);
-                    return (
-                      <button
-                        key={badge.label}
-                        type="button"
-                        onClick={() => setForm({ 
-                          ...form, 
-                          tag_class: badge.class, 
-                          tag_label: badge.class === '' ? '' : badge.label 
-                        })}
-                        style={{
-                          padding: '6px 12px',
-                          borderRadius: 20,
-                          fontSize: 11.5,
-                          fontWeight: '600',
-                          border: `1px solid ${isSel ? G : '#E0E0E0'}`,
-                          background: isSel ? '#FFFDF0' : '#FFF',
-                          color: isSel ? G : D,
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        {badge.label}
-                      </button>
-                    );
-                  })}
+                  {(() => {
+                    const dbTags = lookupLists['product-tags'] || [];
+                    const badges = [
+                      ...dbTags.map(t => ({ label: t.name, color: t.color })),
+                      { label: 'Ninguno', color: '' }
+                    ];
+
+                    return badges.map(badge => {
+                      const isSel = form.tag_class === badge.color && (badge.color === '' ? !form.tag_label : form.tag_label === badge.label);
+                      return (
+                        <button
+                          key={badge.label}
+                          type="button"
+                          onClick={() => setForm({
+                            ...form,
+                            tag_class: badge.color,
+                            tag_label: badge.color === '' ? '' : badge.label
+                          })}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: 20,
+                            fontSize: 11.5,
+                            fontWeight: '600',
+                            border: isSel ? `2px solid ${badge.color || G}` : `1px solid #E0E0E0`,
+                            background: isSel ? (badge.color ? `${badge.color}15` : '#FFFDF0') : '#FFF',
+                            color: isSel ? (badge.color || G) : D,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          {badge.color && (
+                            <span style={{
+                              display: 'inline-block',
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              background: badge.color
+                            }} />
+                          )}
+                          {badge.label}
+                        </button>
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             </div>
@@ -320,7 +335,7 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
               </div>
               <div style={{ background: '#FAF9F6', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: `1px solid ${B}`, marginTop: 8 }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: 13, fontWeight: '700', color: D }}>Disponibilidad Inmediata</span>
+                  <span style={{ fontSize: 13, fontWeight: '700', color: D }}>Disponibilidad</span>
                   <span style={{ fontSize: 11, color: M }}>Si se desactiva, el plato no aparecerá en el menú del cliente.</span>
                 </div>
                 <Checkbox

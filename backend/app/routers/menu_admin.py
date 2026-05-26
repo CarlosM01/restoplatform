@@ -11,7 +11,8 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.deps import require_admin
-from app.models import User
+from app.models import User, ProductTag
+from app.schemas import ProductTagCreate, ProductTagUpdate, ProductTagOut
 from app.models.menu import (
     Category, MenuItem, MenuItemVariant, ModifierGroup, Modifier,
     Supplier, Ingredient, DietaryTag, Allergen,
@@ -328,3 +329,62 @@ def update_allergen(id: uuid.UUID, data: AllergenUpdate, db: Session = Depends(g
 @router.delete("/allergens/{id}", status_code=204)
 def delete_allergen(id: uuid.UUID, db: Session = Depends(get_db), _: User = Depends(require_admin)):
     _delete(Allergen, id, db)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Product Tags
+# ═══════════════════════════════════════════════════════════════════════════
+
+@router.get("/product-tags", response_model=list[ProductTagOut])
+def list_product_tags(db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    return _list(ProductTag, db)
+
+
+@router.post("/product-tags", response_model=ProductTagOut, status_code=201)
+def create_product_tag(data: ProductTagCreate, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    return _create(ProductTag, data, db)
+
+
+@router.get("/product-tags/{id}", response_model=ProductTagOut)
+def get_product_tag(id: int, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    return _get(ProductTag, id, db)
+
+
+@router.patch("/product-tags/{id}", response_model=ProductTagOut)
+def update_product_tag(id: int, data: ProductTagUpdate, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    tag = _get(ProductTag, id, db)
+    old_name = tag.name
+    
+    # Update tag fields
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(tag, field, value)
+    db.commit()
+    db.refresh(tag)
+    
+    # Cascade update to all products referencing this tag
+    if old_name:
+        from app.models import Product
+        products = db.scalars(select(Product).where(Product.tag_label == old_name)).all()
+        for p in products:
+            p.tag_label = tag.name
+            p.tag_class = tag.color
+        db.commit()
+        
+    return tag
+
+
+@router.delete("/product-tags/{id}", status_code=204)
+def delete_product_tag(id: int, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    tag = _get(ProductTag, id, db)
+    old_name = tag.name
+    
+    _delete(ProductTag, id, db)
+    
+    # Cascade deletion to clear tag references on products
+    if old_name:
+        from app.models import Product
+        products = db.scalars(select(Product).where(Product.tag_label == old_name)).all()
+        for p in products:
+            p.tag_label = None
+            p.tag_class = None
+        db.commit()

@@ -11,7 +11,15 @@ export default function ClassicEntityForm({ entityName, editEntity, lookupLists,
   const isEdit = !!editEntity;
   const configs = FIELD_CONFIGS[entityName] || [];
 
-  const [form, setForm] = useState(() => initFormState(configs, editEntity));
+  const [form, setForm] = useState(() => {
+    const init = initFormState(configs, editEntity);
+    configs.forEach(field => {
+      if (field.type === 'color' && !init[field.name]) {
+        init[field.name] = '#FF9F43';
+      }
+    });
+    return init;
+  });
 
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState(null);
@@ -89,6 +97,55 @@ export default function ClassicEntityForm({ entityName, editEntity, lookupLists,
                   </option>
                 ))}
               </Select>
+            );
+          }
+
+          if (field.type === 'color') {
+            const presets = ['#2ECC71', '#FF9F43', '#1B1916', '#E74C3C', '#9B59B6', '#3498DB', '#F1C40F'];
+            const currentColor = form[field.name] || '#FF9F43';
+            return (
+              <div key={field.name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--color-dark)' }}>{field.label}</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {presets.map(p => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setForm({ ...form, [field.name]: p })}
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: '50%',
+                          background: p,
+                          border: currentColor === p ? '2px solid var(--color-dark)' : '1px solid rgba(0,0,0,0.15)',
+                          boxShadow: currentColor === p ? '0 0 0 2px #fff, 0 4px 8px rgba(0,0,0,0.15)' : 'none',
+                          cursor: 'pointer',
+                          transform: currentColor === p ? 'scale(1.1)' : 'none',
+                          transition: 'all 0.15s ease'
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--color-muted)' }}>Personalizado:</span>
+                    <input
+                      type="color"
+                      value={currentColor}
+                      onChange={e => setForm({ ...form, [field.name]: e.target.value })}
+                      style={{
+                        width: 34,
+                        height: 34,
+                        border: '1px solid rgba(0,0,0,0.15)',
+                        borderRadius: 8,
+                        padding: 0,
+                        background: 'none',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
             );
           }
 

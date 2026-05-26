@@ -222,3 +222,23 @@ class PaymentOut(BaseModel):
     amount: float
     status: PaymentStatus
     model_config = ConfigDict(from_attributes=True)
+
+
+# ============ PRODUCT TAGS ============
+class ProductTagBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    color: str = Field("#FF9F43", max_length=50)
+
+
+class ProductTagCreate(ProductTagBase):
+    pass
+
+
+class ProductTagUpdate(BaseModel):
+    name: str | None = None
+    color: str | None = None
+
+
+class ProductTagOut(ProductTagBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)

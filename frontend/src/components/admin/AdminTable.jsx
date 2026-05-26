@@ -136,6 +136,15 @@ export default function AdminTable({
               <th style={{ textAlign: 'center' }}>ACCIONES</th>
             </tr>
           )}
+
+          {activeTab === 'product-tags' && (
+            <tr>
+              <th>VISTA PREVIA</th>
+              <th>NOMBRE</th>
+              <th>COLOR</th>
+              <th style={{ textAlign: 'center' }}>ACCIONES</th>
+            </tr>
+          )}
         </thead>
         <tbody>
           {filteredData.length === 0 ? (
@@ -361,6 +370,27 @@ export default function AdminTable({
                     <td style={{ textAlign: 'center' }}>
                       <button onClick={() => setEditTarget(item)} className="admin-action-btn edit">Editar</button>
                       <button onClick={() => removeEntity('allergens', item.id)} className="admin-action-btn delete">Eliminar</button>
+                    </td>
+                  </>
+                )}
+
+                {activeTab === 'product-tags' && (
+                  <>
+                    <td>
+                      <span className="card-tag" style={{ padding: '4px 8px', borderRadius: 4, color: '#FFF', fontSize: 10, fontWeight: '700', textTransform: 'uppercase', background: item.color || 'var(--color-gold)' }}>
+                        {item.name}
+                      </span>
+                    </td>
+                    <td style={{ fontWeight: 600 }}>{item.name}</td>
+                    <td style={{ verticalAlign: 'middle' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ display: 'inline-block', width: '16px', height: '16px', borderRadius: '50%', background: item.color || 'var(--color-gold)', border: '1px solid rgba(0,0,0,0.1)' }} />
+                        <code style={{ fontSize: 11, color: M }}>{item.color}</code>
+                      </div>
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button onClick={() => setEditTarget(item)} className="admin-action-btn edit">Editar</button>
+                      <button onClick={() => removeEntity('product-tags', item.id)} className="admin-action-btn delete">Eliminar</button>
                     </td>
                   </>
                 )}

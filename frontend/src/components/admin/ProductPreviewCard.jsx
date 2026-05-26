@@ -3,6 +3,7 @@ import { isUrl, COLORS, buildGallery } from '../../lib/utils.js';
 
 export default function ProductPreviewCard({ form, fmt }) {
   const { G, D, M, B } = COLORS;
+  const isColor = (str) => typeof str === 'string' && (str.startsWith('#') || str.startsWith('rgb') || str.startsWith('hsl'));
 
   // Gallery cycling: auto-advance every 2s when multiple gallery images exist
   const galleryImages = buildGallery(form);
@@ -59,7 +60,21 @@ export default function ProductPreviewCard({ form, fmt }) {
             <span>🍽️</span>
           )}
           {form.tag_label && (
-            <span className={`card-tag ${form.tag_class || 'popular'}`} style={{ position: 'absolute', top: 12, left: 12, background: form.tag_class === 'vegan' ? '#2ecc71' : (form.tag_class === 'chef' ? 'var(--color-dark)' : G), color: '#FFF', fontSize: 10, fontWeight: '700', padding: '4px 8px', borderRadius: 4, textTransform: 'uppercase' }}>
+            <span 
+              className={`card-tag ${isColor(form.tag_class) ? '' : (form.tag_class || 'popular')}`} 
+              style={{ 
+                position: 'absolute', 
+                top: 12, 
+                left: 12, 
+                background: isColor(form.tag_class) ? form.tag_class : (form.tag_class === 'vegan' ? '#2ecc71' : (form.tag_class === 'chef' ? 'var(--color-dark)' : G)), 
+                color: '#FFF', 
+                fontSize: 10, 
+                fontWeight: '700', 
+                padding: '4px 8px', 
+                borderRadius: 4, 
+                textTransform: 'uppercase' 
+              }}
+            >
               {form.tag_label}
             </span>
           )}
