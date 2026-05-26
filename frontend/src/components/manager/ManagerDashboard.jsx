@@ -31,7 +31,7 @@ export default function ManagerDashboard() {
       {/* Header */}
       <Header
         title="PANEL ENCARGADO"
-        subtitle="La Leña Restaurante"
+        subtitle="Restaurante Demo"
         user={user}
         logoutAction={logout}
       />

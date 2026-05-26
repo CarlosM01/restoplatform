@@ -71,8 +71,8 @@ export default function AdminDashboard() {
       {/* Sidebar */}
       <div className="admin-sidebar">
         <div>
-          <div className="admin-brand">RestoPlatform</div>
-          <div className="admin-venue">La Leña Restaurante</div>
+          <div className="admin-brand">RestoApp</div>
+          <div className="admin-venue">Restaurante Demo</div>
         </div>
 
         <div className="admin-nav">

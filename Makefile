@@ -1,4 +1,4 @@
-# RestoPlatform Project Makefile
+# RestoApp Project Makefile
 # Standardizes common development tasks for frontend, backend, and database.
 
 .PHONY: help up down restart status logs logs-backend logs-frontend build clean backend-shell frontend-shell db-shell db-migrate db-seed frontend-install frontend-dev frontend-up
@@ -8,7 +8,7 @@ DOCKER_COMBO := $(shell docker compose version >/dev/null 2>&1 && echo "docker c
 
 help:
 	@echo "========================================================================"
-	@echo "                         RestoPlatform - Makefile                       "
+	@echo "                            RestoApp - Makefile                          "
 	@echo "========================================================================"
 	@echo "Available commands:"
 	@echo ""

@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="RestoPlatform API",
+    title="RestoApp API",
     version="0.1.0",
     description="Backend para plataforma digital de restaurantes PYME",
     lifespan=lifespan,
@@ -41,7 +41,7 @@ app.include_router(menu_admin.router)
 @app.get("/", tags=["root"])
 def root():
     return {
-        "app": "RestoPlatform API",
+        "app": "RestoApp API",
         "version": "0.1.0",
         "docs": "/docs",
         "redoc": "/redoc",

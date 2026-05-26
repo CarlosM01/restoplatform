@@ -74,8 +74,8 @@ export default function CustomerMenu() {
     <div className="app-shell">
       {/* Header */}
       <Header
-        title="RestoPlatform"
-        subtitle="La Leña Restaurante"
+        title="RestoApp"
+        subtitle="Restaurante Demo"
         user={user}
         logoutAction={logout}
         actions={loginButton}
@@ -169,7 +169,7 @@ export default function CustomerMenu() {
       </div>
 
       <div style={{ textAlign: 'center', padding: '6px 0 10px', fontSize: 8, color: '#C4B8A8', letterSpacing: 1.5 }}>
-        POWERED BY RESTOPLATFORM · BETA v0.1
+        POWERED BY RESTOAPP · BETA v0.1
       </div>
 
       {/* Customizer Modal */}

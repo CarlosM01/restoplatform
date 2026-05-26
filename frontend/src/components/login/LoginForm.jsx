@@ -25,8 +25,8 @@ export default function LoginForm() {
   return (
     <div className="app-shell">
       <Header
-        title="RestoPlatform"
-        subtitle="La Leña Restaurante"
+        title="RestoApp"
+        subtitle="Restaurante Demo"
         actions={backLink}
       />
 
@@ -98,14 +98,6 @@ export default function LoginForm() {
           </Button>
         </form>
 
-        {mode === 'login' && (
-          <div className="login-demo-box">
-            <strong className="login-demo-title">Usuarios de prueba:</strong><br />
-            Admin: admin@lalena.cl / admin123<br />
-            Encargado: manager@lalena.cl / encargado123<br />
-            Cliente: customer@test.cl / cliente123
-          </div>
-        )}
       </div>
     </div>
   );

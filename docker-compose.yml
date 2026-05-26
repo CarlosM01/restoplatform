@@ -51,7 +51,7 @@ services:
       DB_DATABASE: restoplatform
       DB_USER: postgres
       DB_PASSWORD: postgres
-      ADMIN_EMAIL: admin@lalena.cl
+      ADMIN_EMAIL: admin@restoapp.cl
       ADMIN_PASSWORD: admin123
       PUBLIC_URL: http://localhost:8055
     depends_on:

@@ -1,4 +1,4 @@
-# RestoPlatform 🍽️
+# RestoApp 🍽️
 
 ERP/SaaS para restaurantes PYME. Stack completo moderno con FastAPI + SQLAlchemy + Astro + React + Directus CMS.
 
@@ -69,7 +69,7 @@ Toda la plataforma y la API están consolidadas bajo el mismo host a través de 
 - **Panel de Administración**: [http://localhost/admin](http://localhost/admin) (o `:4321/admin`)
 - **Acceso / Login único**: [http://localhost/login](http://localhost/login) (o `:4321/login`)
 - **Documentación Interactiva API (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Directus CMS**: [http://localhost:8055](http://localhost:8055) (Email: `admin@lalena.cl` / Clave: `admin123`)
+- **Directus CMS**: [http://localhost:8055](http://localhost:8055) (Email: `admin@restoapp.cl` / Clave: `admin123`)
 
 #### Si usas Opción B (Desarrollo Frontend en Host):
 El catálogo y páginas corren en el dev server de Astro:
@@ -78,7 +78,7 @@ El catálogo y páginas corren en el dev server de Astro:
 - **Panel de Administración**: [http://localhost:4321/admin](http://localhost:4321/admin)
 - **Acceso / Login único**: [http://localhost:4321/login](http://localhost:4321/login)
 - **Documentación Interactiva API (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Directus CMS**: [http://localhost:8055](http://localhost:8055) (Email: `admin@lalena.cl` / Clave: `admin123`)
+- **Directus CMS**: [http://localhost:8055](http://localhost:8055) (Email: `admin@restoapp.cl` / Clave: `admin123`)
 
 
 ---
@@ -87,8 +87,8 @@ El catálogo y páginas corren en el dev server de Astro:
 
 | Rol | Email | Contraseña | Descripción / Alcance |
 |---|---|---|---|
-| **Admin** | `admin@lalena.cl` | `admin123` | Control total del sistema, CRUD de usuarios, bloqueo y ban |
-| **Encargado (Manager)** | `encargado@lalena.cl` | `encargado123` | Gestión de stock, visualización y actualización de pedidos del restaurante |
+| **Admin** | `admin@restoapp.cl` | `admin123` | Control total del sistema, CRUD de usuarios, bloqueo y ban |
+| **Encargado (Manager)** | `encargado@restoapp.cl` | `encargado123` | Gestión de stock, visualización y actualización de pedidos del restaurante |
 | **Cliente** | `customer@test.cl` | `cliente123` | Usuario registrado para seguimiento de pedidos e historial |
 | **Invitado (Guest)** | *No requiere* | *No requiere* | Checkout rápido sin registro directo en la interfaz de pago |
 
@@ -188,7 +188,7 @@ Para acelerar las pruebas del flujo de compra y la experiencia de usuario (UX) l
 Directus se conecta de manera transparente a la misma instancia de PostgreSQL que la API FastAPI, ofreciendo una consola visual de control:
 
 1. Ingresa a [http://localhost:8055](http://localhost:8055).
-2. Credenciales: `admin@lalena.cl` / `admin123`.
+2. Credenciales: `admin@restoapp.cl` / `admin123`.
 3. Permite la visualización rápida de la data, modificación directa de stock y supervisión del estado físico de las mesas cargadas en el restaurante.
 
 ---

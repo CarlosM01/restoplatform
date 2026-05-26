@@ -1,4 +1,4 @@
-@startuml Restoplatform_Database_Schema
+@startuml RestoApp_Database_Schema
 
 !theme plain
 hide circle

@@ -27,18 +27,18 @@ def seed():
     db = SessionLocal()
     try:
         # ===== USUARIOS =====
-        if not db.scalar(select(User).where(User.email == "admin@lalena.cl")):
+        if not db.scalar(select(User).where(User.email == "admin@restoapp.cl")):
             print("Creando usuarios...")
             admin = User(
                 rut="11111111-1",
-                email="admin@lalena.cl",
+                email="admin@restoapp.cl",
                 name="Admin Dueño",
                 password_hash=hash_password("admin123"),
                 role=Role.ADMIN,
             )
             encargado = User(
                 rut="22222222-2",
-                email="encargado@lalena.cl",
+                email="encargado@restoapp.cl",
                 name="Carlos Encargado",
                 password_hash=hash_password("encargado123"),
                 role=Role.MANAGER,
@@ -352,7 +352,7 @@ def seed():
         cat_fondos = Category(
             id=uuid.uuid4(),
             name="Platos de Fondo",
-            subtitle="Los clásicos de La Leña",
+            subtitle="Los clásicos de la casa",
             description="Nuestras carnes y especialidades",
             image_url="https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=60",
             sort_order=2,
@@ -605,8 +605,8 @@ def seed():
         db.commit()
         print("\n✓ Seed completado exitosamente")
         print("\nUsuarios de prueba:")
-        print("  Admin:     admin@lalena.cl / admin123")
-        print("  Encargado: encargado@lalena.cl / encargado123")
+        print("  Admin:     admin@restoapp.cl / admin123")
+        print("  Encargado: encargado@restoapp.cl / encargado123")
         print("  Cliente:   customer@test.cl / cliente123")
     except Exception as e:
         db.rollback()
