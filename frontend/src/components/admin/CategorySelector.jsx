@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import Input from '../common/Input.jsx';
+import { isUrl, COLORS } from '../../lib/utils.js';
 
 export default function CategorySelector({ selectedCategory, onCategorySelect, categories = [], apis, saving, setSaving }) {
   const [showNewCatInput, setShowNewCatInput] = useState(false);
   const [newCatName, setNewCatName] = useState('');
   const [newCatImg, setNewCatImg] = useState('');
 
-  const G = 'var(--color-gold)';
-  const D = 'var(--color-dark)';
-  const M = 'var(--color-muted)';
-  const B = 'var(--color-border)';
+  const { G, D, M, B } = COLORS;
 
   const handleCreateCategory = async () => {
     if (!newCatName.trim()) return;
@@ -33,7 +31,7 @@ export default function CategorySelector({ selectedCategory, onCategorySelect, c
     }
   };
 
-  const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

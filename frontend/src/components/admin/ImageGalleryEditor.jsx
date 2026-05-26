@@ -1,7 +1,5 @@
 import React, { useRef } from 'react';
-
-const isUrl = (str) =>
-  typeof str === 'string' && (str.startsWith('http') || str.startsWith('https') || str.startsWith('/') || str.startsWith('data:'));
+import { isUrl, COLORS } from '../../lib/utils.js';
 
 /**
  * ImageGalleryEditor — manages an ordered list of {url, alt_text, sort_order} objects.
@@ -45,10 +43,7 @@ export default function ImageGalleryEditor({ gallery = [], onChange }) {
 
   const onDragEnd = () => { dragIdx.current = null; };
 
-  const G = 'var(--color-gold)';
-  const D = 'var(--color-dark)';
-  const M = 'var(--color-muted)';
-  const B = 'var(--color-border)';
+  const { G, D, M, B } = COLORS;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

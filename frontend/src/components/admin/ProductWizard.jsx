@@ -7,35 +7,21 @@ import CategorySelector from './CategorySelector.jsx';
 import IngredientSelector from './IngredientSelector.jsx';
 import AllergenSelector from './AllergenSelector.jsx';
 import VariationSelector from './VariationSelector.jsx';
-import ModifierGroupAccordion from './ModifierGroupAccordion.jsx';
 import ProductPreviewCard from './ProductPreviewCard.jsx';
 import ImageGalleryEditor from './ImageGalleryEditor.jsx';
 import { FIELD_CONFIGS } from './FieldConfigs.js';
 import { fmt } from '../../lib/api.js';
+import { COLORS } from '../../lib/utils.js';
+import { initFormState, parseFormFields } from '../../lib/formHelpers.js';
 
 export default function ProductWizard({ editEntity, lookupLists, apis, onClose, onSaved }) {
   const isEdit = !!editEntity;
   const configs = FIELD_CONFIGS['items'] || [];
-
-  const G = 'var(--color-gold)';
-  const D = 'var(--color-dark)';
-  const M = 'var(--color-muted)';
-  const B = 'var(--color-border)';
+  const { G, D, M, B } = COLORS;
 
   // Initialize form state
   const [form, setForm] = useState(() => {
-    const init = {};
-    configs.forEach(field => {
-      if (isEdit) {
-        init[field.name] = editEntity[field.name] !== null && editEntity[field.name] !== undefined
-          ? editEntity[field.name]
-          : (field.type === 'checkbox' ? false : '');
-      } else {
-        init[field.name] = field.default !== undefined
-          ? field.default
-          : (field.type === 'checkbox' ? false : '');
-      }
-    });
+    const init = initFormState(configs, editEntity);
     init.modifiers = editEntity?.modifiers || [];
     init.ingredients = editEntity?.ingredients || [];
     init.stock_inicial = editEntity?.inventory?.stock !== undefined ? editEntity.inventory.stock : 0;
@@ -59,7 +45,6 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
 
   // Wizard step state
   const [activeStep, setActiveStep] = useState(0);
-  const [maxStepReached, setMaxStepReached] = useState(0);
 
   const handleNext = () => {
     setErr(null);
@@ -76,11 +61,7 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
       }
     }
     
-    const next = activeStep + 1;
-    setActiveStep(next);
-    if (next > maxStepReached) {
-      setMaxStepReached(next);
-    }
+    setActiveStep(activeStep + 1);
   };
 
   const handleBack = () => {
@@ -101,23 +82,7 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
     }
 
     // Cast data cleanly to match Pydantic schemas
-    const parsed = {};
-    configs.forEach(field => {
-      const val = form[field.name];
-      if (field.type === 'number') {
-        if (val === '' || val === null || val === undefined) {
-          parsed[field.name] = (field.nullable || field.name.endsWith('_id') || field.name === 'price_override' || field.name === 'prep_time_minutes' || field.name === 'max_quantity') ? null : 0;
-        } else {
-          parsed[field.name] = Number(val);
-        }
-      } else if (field.type === 'checkbox') {
-        parsed[field.name] = !!val;
-      } else if (field.type === 'select') {
-        parsed[field.name] = val === '' ? null : val;
-      } else {
-        parsed[field.name] = val === '' ? (field.nullable ? null : '') : val;
-      }
-    });
+    const parsed = parseFormFields(configs, form);
 
     parsed.modifiers = form.modifiers || [];
     parsed.ingredients = form.ingredients || [];
@@ -150,8 +115,7 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
     { title: 'Información', icon: '📝' },
     { title: 'Categoría y Stock', icon: '📦' },
     { title: 'Salud', icon: '🌱' },
-    { title: 'Variaciones', icon: '🍕' },
-    { title: 'Modificadores', icon: '🛠️' }
+    { title: 'Variaciones', icon: '🍕' }
   ];
 
   return (
@@ -164,7 +128,6 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
           {steps.map((s, idx) => {
             const isCompleted = idx < activeStep;
             const isActive = idx === activeStep;
-            const isClickable = idx <= maxStepReached;
             
             return (
               <div 
@@ -175,9 +138,9 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
                   alignItems: 'center', 
                   flex: 1, 
                   position: 'relative',
-                  cursor: isClickable ? 'pointer' : 'not-allowed'
+                  cursor: 'pointer'
                 }}
-                onClick={() => isClickable && setActiveStep(idx)}
+                onClick={() => setActiveStep(idx)}
               >
                 <div style={{
                   width: 32,
@@ -394,16 +357,6 @@ export default function ProductWizard({ editEntity, lookupLists, apis, onClose, 
               extras={form.extras}
               onSizesChange={list => setForm({ ...form, sizes: list })}
               onExtrasChange={list => setForm({ ...form, extras: list })}
-            />
-          )}
-
-          {/* STEP 5: INTERACTIVE MODIFIERS ACCORDION */}
-          {activeStep === 4 && (
-            <ModifierGroupAccordion
-              modifiers={form.modifiers}
-              onModifiersChange={list => setForm({ ...form, modifiers: list })}
-              modifierGroups={lookupLists['modifier-groups']}
-              fmt={fmt}
             />
           )}
 

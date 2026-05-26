@@ -1,4 +1,5 @@
 import React from 'react';
+import { COLORS } from '../../lib/utils.js';
 
 const DEFAULT_ALLERGEN_MAP = {
   'huevo': { icon: '🥚', label: 'EGGS' },
@@ -12,8 +13,7 @@ const DEFAULT_ALLERGEN_MAP = {
 };
 
 export default function AllergenSelector({ selectedAllergens, onAllergensChange, dbAllergens = [] }) {
-  const D = 'var(--color-dark)';
-  const M = 'var(--color-muted)';
+  const { D, M } = COLORS;
 
   const getDynamicAllergenInfo = (dbAllergen) => {
     const key = dbAllergen.name.toLowerCase();

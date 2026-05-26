@@ -1,8 +1,7 @@
 import React from 'react';
 import Modal from '../common/Modal.jsx';
 import Button from '../common/Button.jsx';
-
-const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
+import { isUrl } from '../../lib/utils.js';
 
 export default function CustomizerModal({ customizingItem, selectedOptions, toggleOption, customTotal, handleAddCustomized, onClose, fmt }) {
   if (!customizingItem) return null;

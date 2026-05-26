@@ -5,26 +5,13 @@ import Select from '../common/Select.jsx';
 import Checkbox from '../common/Checkbox.jsx';
 import Textarea from '../common/Textarea.jsx';
 import { FIELD_CONFIGS } from './FieldConfigs.js';
+import { initFormState, parseFormFields } from '../../lib/formHelpers.js';
 
 export default function ClassicEntityForm({ entityName, editEntity, lookupLists, apis, onClose, onSaved }) {
   const isEdit = !!editEntity;
   const configs = FIELD_CONFIGS[entityName] || [];
 
-  const [form, setForm] = useState(() => {
-    const init = {};
-    configs.forEach(field => {
-      if (isEdit) {
-        init[field.name] = editEntity[field.name] !== null && editEntity[field.name] !== undefined
-          ? editEntity[field.name]
-          : (field.type === 'checkbox' ? false : '');
-      } else {
-        init[field.name] = field.default !== undefined
-          ? field.default
-          : (field.type === 'checkbox' ? false : '');
-      }
-    });
-    return init;
-  });
+  const [form, setForm] = useState(() => initFormState(configs, editEntity));
 
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState(null);
@@ -35,23 +22,7 @@ export default function ClassicEntityForm({ entityName, editEntity, lookupLists,
     setErr(null);
 
     // Cast data cleanly to match Pydantic schemas
-    const parsed = {};
-    configs.forEach(field => {
-      const val = form[field.name];
-      if (field.type === 'number') {
-        if (val === '' || val === null || val === undefined) {
-          parsed[field.name] = (field.nullable || field.name.endsWith('_id') || field.name === 'price_override' || field.name === 'prep_time_minutes' || field.name === 'max_quantity') ? null : 0;
-        } else {
-          parsed[field.name] = Number(val);
-        }
-      } else if (field.type === 'checkbox') {
-        parsed[field.name] = !!val;
-      } else if (field.type === 'select') {
-        parsed[field.name] = val === '' ? null : val;
-      } else {
-        parsed[field.name] = val === '' ? (field.nullable ? null : '') : val;
-      }
-    });
+    const parsed = parseFormFields(configs, form);
 
     try {
       if (isEdit) {

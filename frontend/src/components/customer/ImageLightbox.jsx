@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import useSwipe from '../../hooks/useSwipe.js';
 
 /**
  * ImageLightbox — full-screen image viewer with keyboard, swipe, and click navigation.
@@ -9,12 +10,13 @@ import React, { useState, useEffect, useCallback } from 'react';
  */
 export default function ImageLightbox({ images = [], startIndex = 0, onClose }) {
   const [current, setCurrent] = useState(startIndex);
-  const [touchStart, setTouchStart] = useState(null);
 
   const total = images.length;
 
   const prev = useCallback(() => setCurrent(c => (c - 1 + total) % total), [total]);
   const next = useCallback(() => setCurrent(c => (c + 1) % total), [total]);
+
+  const { onTouchStart, onTouchEnd } = useSwipe(next, prev);
 
   // Keyboard navigation
   useEffect(() => {
@@ -32,14 +34,6 @@ export default function ImageLightbox({ images = [], startIndex = 0, onClose }) 
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
-
-  const onTouchStart = (e) => setTouchStart(e.touches[0].clientX);
-  const onTouchEnd = (e) => {
-    if (touchStart === null) return;
-    const delta = touchStart - e.changedTouches[0].clientX;
-    if (Math.abs(delta) > 40) delta > 0 ? next() : prev();
-    setTouchStart(null);
-  };
 
   if (!images.length) return null;
   const img = images[current];

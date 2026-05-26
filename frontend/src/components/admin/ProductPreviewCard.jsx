@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { isUrl, COLORS, buildGallery } from '../../lib/utils.js';
 
 export default function ProductPreviewCard({ form, fmt }) {
-  const G = 'var(--color-gold)';
-  const D = 'var(--color-dark)';
-  const M = 'var(--color-muted)';
-  const B = 'var(--color-border)';
-
-  const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
+  const { G, D, M, B } = COLORS;
 
   // Gallery cycling: auto-advance every 2s when multiple gallery images exist
-  const galleryImages = (form.gallery || []).filter(g => isUrl(g.url));
+  const galleryImages = buildGallery(form);
   const hasGallery = galleryImages.length > 1;
   const [activeSlide, setActiveSlide] = useState(0);
 

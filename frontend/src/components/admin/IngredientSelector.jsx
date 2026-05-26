@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
+import { COLORS } from '../../lib/utils.js';
 
 export default function IngredientSelector({ selectedIngredients = [], onIngredientsChange, lookupIngredients = [] }) {
   const [ingSearch, setIngSearch] = useState('');
   const [showIngSuggestions, setShowIngSuggestions] = useState(false);
 
-  const G = 'var(--color-gold)';
-  const D = 'var(--color-dark)';
-  const M = 'var(--color-muted)';
-  const B = 'var(--color-border)';
+  const { G, D, M, B } = COLORS;
 
   const handleAddIngredient = (name) => {
     const trimmed = name.trim();

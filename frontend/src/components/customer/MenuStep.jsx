@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-
-const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
+import { isUrl } from '../../lib/utils.js';
 
 // Category images, product ratings, and tags are retrieved from the database.
 

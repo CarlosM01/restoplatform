@@ -1,18 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import ImageLightbox from './ImageLightbox.jsx';
-
-const isUrl = (str) => typeof str === 'string' && (str.startsWith('http') || str.startsWith('/') || str.startsWith('data:'));
-
-// Build unified gallery array: prefer product.gallery, fallback to single product.image
-function buildGallery(product) {
-  if (product.gallery && product.gallery.length > 0) {
-    return product.gallery.filter(g => isUrl(g.url));
-  }
-  if (isUrl(product.image)) {
-    return [{ url: product.image, alt_text: product.name }];
-  }
-  return [];
-}
+import { isUrl, buildGallery } from '../../lib/utils.js';
+import useSwipe from '../../hooks/useSwipe.js';
 
 export default function ProductDetailDrawer({ product, onClose, onAdd, fmt }) {
   if (!product) return null;
@@ -30,18 +19,11 @@ export default function ProductDetailDrawer({ product, onClose, onAdd, fmt }) {
   const gallery = buildGallery(product);
   const [heroIdx, setHeroIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [touchStart, setTouchStart] = useState(null);
 
   const prevSlide = useCallback(() => setHeroIdx(i => (i - 1 + gallery.length) % gallery.length), [gallery.length]);
   const nextSlide = useCallback(() => setHeroIdx(i => (i + 1) % gallery.length), [gallery.length]);
 
-  const onTouchStart = (e) => setTouchStart(e.touches[0].clientX);
-  const onTouchEnd = (e) => {
-    if (touchStart === null) return;
-    const delta = touchStart - e.changedTouches[0].clientX;
-    if (Math.abs(delta) > 40) delta > 0 ? nextSlide() : prevSlide();
-    setTouchStart(null);
-  };
+  const { onTouchStart, onTouchEnd } = useSwipe(nextSlide, prevSlide);
 
   const toggleExtra = (extra) => {
     setSelectedExtras((prev) => {
