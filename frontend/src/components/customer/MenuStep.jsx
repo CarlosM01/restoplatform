@@ -213,12 +213,22 @@ export default function MenuStep({ cats, cat, setCat, items, products = [], cart
             const stockOk = i.inventory && i.inventory.stock > 0;
             const rating = i.rating !== undefined && i.rating !== null ? i.rating : 4.5;
 
+            const hasVariations = (i.sizes && i.sizes.length > 0) || (i.extras && i.extras.length > 0) || (i.modifiers && i.modifiers.length > 0);
+
             return (
               <div 
                 key={i.id} 
                 className={`menu-card ${incartQty > 0 ? 'selected-card' : ''}`}
                 style={{ opacity: stockOk ? 1 : 0.6 }}
-                onClick={() => setActiveDetailProduct(i)}
+                onClick={() => {
+                  if ((i.sizes && i.sizes.length > 0) || (i.extras && i.extras.length > 0)) {
+                    setActiveDetailProduct(i);
+                  } else if (i.modifiers && i.modifiers.length > 0) {
+                    add(i);
+                  } else {
+                    setActiveDetailProduct(i);
+                  }
+                }}
               >
                 <div className="card-thumb">
                   {isUrl(i.image) ? (
@@ -258,7 +268,7 @@ export default function MenuStep({ cats, cat, setCat, items, products = [], cart
 
                     {incartQty > 0 ? (
                       <div className="cart-qty-controls" onClick={(e) => e.stopPropagation()}>
-                        {i.modifiers && i.modifiers.length > 0 ? (
+                        {hasVariations ? (
                           <>
                             <span className="qty-tag">
                               {incartQty} agregados

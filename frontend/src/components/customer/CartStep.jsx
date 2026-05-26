@@ -20,10 +20,16 @@ export default function CartStep({ cart, upd, total, fmt }) {
               )}
               <span>{c.name}</span>
             </div>
-            {c.selectedModifiers && c.selectedModifiers.length > 0 && (
+            {(c.selectedSize || (c.selectedExtras && c.selectedExtras.length > 0) || (c.selectedModifiers && c.selectedModifiers.length > 0)) && (
               <div className="cart-item-mods">
-                {c.selectedModifiers.map((m, idx) => (
-                  <span key={idx}>· {m.name} (+{fmt(m.price_delta)})</span>
+                {c.selectedSize && (
+                  <span>· Tamaño: {c.selectedSize.name} {c.selectedSize.price_delta > 0 ? `(+${fmt(c.selectedSize.price_delta)})` : ''}</span>
+                )}
+                {c.selectedExtras && c.selectedExtras.length > 0 && c.selectedExtras.map((ext, idx) => (
+                  <span key={`ext-${idx}`}>· Extra: {ext.name} (+{fmt(ext.price)})</span>
+                ))}
+                {c.selectedModifiers && c.selectedModifiers.length > 0 && c.selectedModifiers.map((m, idx) => (
+                  <span key={`mod-${idx}`}>· {m.name} {m.price_delta > 0 ? `(+${fmt(m.price_delta)})` : ''}</span>
                 ))}
               </div>
             )}
